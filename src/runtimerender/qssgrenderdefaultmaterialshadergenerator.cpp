@@ -915,6 +915,7 @@ static void generateFragmentShader(QSSGStageGeneratorBase &fragmentShader,
     bool isDoubleSided = keyProps.m_isDoubleSided.getValue(inKey);
     bool hasImage = firstImage != nullptr;
 
+    QSSGRenderLayer::OITMethod oitMethod = static_cast<QSSGRenderLayer::OITMethod>(keyProps.m_orderIndependentTransparency.getValue(inKey));
     bool hasIblProbe = keyProps.m_hasIbl.getValue(inKey);
     bool specularLightingEnabled = metalnessEnabled || materialAdapter->isSpecularEnabled() || hasIblProbe; // always true for Custom, depends for others
     bool specularAAEnabled = keyProps.m_specularAAEnabled.getValue(inKey);
@@ -1099,7 +1100,7 @@ static void generateFragmentShader(QSSGStageGeneratorBase &fragmentShader,
 
     bool includeSSAOVars = enableSSAO || enableShadowMaps;
 
-    vertexShader.beginFragmentGeneration(shaderLibraryManager);
+    vertexShader.beginFragmentGeneration(shaderLibraryManager, oitMethod);
 
     // Unshaded custom materials need no code in main (apart from calling qt_customMain)
     const bool hasCustomFrag = materialAdapter->hasCustomShaderSnippet(QSSGShaderCache::ShaderType::Fragment);
@@ -1966,9 +1967,20 @@ static void generateFragmentShader(QSSGStageGeneratorBase &fragmentShader,
         }
 
         Q_ASSERT(!isDepthPass && !isOrthoShadowPass && !isPerspectiveShadowPass);
-        fragmentShader.addInclude("tonemapping.glsllib");
-        fragmentShader.append("    fragOutput = vec4(qt_tonemap(qt_color_sum));");
 
+        if (oitMethod == QSSGRenderLayer::OITMethod::WeightedBlended) {
+            fragmentShader.addInclude("orderindependenttransparency.glsllib");
+            fragmentShader.addInclude("tonemapping.glsllib");
+            fragmentShader.addUniform("qt_cameraPosition", "vec3");
+            fragmentShader.addUniform("qt_cameraProperties", "vec2");
+            fragmentShader.append("    float z = abs(gl_FragCoord.z);");
+            fragmentShader.append("    qt_color_sum.rgb = qt_tonemap(qt_color_sum.rgb) * qt_color_sum.a;");
+            fragmentShader.append("    fragOutput = qt_color_sum * qt_transparencyWeight(z, qt_color_sum.a, qt_cameraProperties.y);");
+            fragmentShader.append("    revealageOutput = vec4(qt_color_sum.a);");
+        } else {
+            fragmentShader.addInclude("tonemapping.glsllib");
+            fragmentShader.append("    fragOutput = vec4(qt_tonemap(qt_color_sum));");
+        }
         // Debug Overrides for viewing various parts of the shading process
         if (Q_UNLIKELY(debugMode != QSSGRenderLayer::MaterialDebugMode::None)) {
             fragmentShader.append("    vec3 debugOutput = vec3(0.0);\n");
@@ -2038,8 +2050,18 @@ static void generateFragmentShader(QSSGStageGeneratorBase &fragmentShader,
                            << "    qt_shadowDist = (qt_shadowDist - qt_cameraProperties.x) / (qt_cameraProperties.y - qt_cameraProperties.x);\n"
                            << "    fragOutput = vec4(qt_shadowDist, qt_shadowDist, qt_shadowDist, 1.0);\n";
         } else {
-            fragmentShader.addInclude("tonemapping.glsllib");
-            fragmentShader.append("    fragOutput = vec4(qt_tonemap(qt_diffuseColor.rgb), qt_diffuseColor.a * qt_objectOpacity);");
+            if (oitMethod == QSSGRenderLayer::OITMethod::WeightedBlended) {
+                fragmentShader.addInclude("orderindependenttransparency.glsllib");
+                fragmentShader.addUniform("qt_cameraPosition", "vec3");
+                fragmentShader.addUniform("qt_cameraProperties", "vec2");
+                fragmentShader.append("    float z = abs(gl_FragCoord.z);");
+                fragmentShader.append("    vec4 color = vec4(qt_diffuseColor.rgb, qt_diffuseColor.a * qt_objectOpacity);");
+                fragmentShader.append("    fragOutput = qt_transparencyWeight(z, color.a, qt_cameraProperties.y) * color;");
+                fragmentShader.append("    revealageOutput = vec4(color.a);");
+            } else {
+                fragmentShader.addInclude("tonemapping.glsllib");
+                fragmentShader.append("    fragOutput = vec4(qt_tonemap(qt_diffuseColor.rgb), qt_diffuseColor.a * qt_objectOpacity);");
+            }
         }
     }
 }

@@ -67,7 +67,10 @@ enum class QSSGLayerRenderPreparationResultFlag
     RequiresScreenTexture = 1 << 5,
 
     // set together with RequiresScreenTexture when SCREEN_MIP_TEXTURE is used
-    RequiresMipmapsForScreenTexture = 1 << 6
+    RequiresMipmapsForScreenTexture = 1 << 6,
+
+    // Set when material has custom blend mode(not SourceOver)
+    MaterialHasCustomBlendMode = 1 << 7
 };
 
 struct QSSGLayerRenderPreparationResultFlags : public QFlags<QSSGLayerRenderPreparationResultFlag>
@@ -124,6 +127,15 @@ struct QSSGLayerRenderPreparationResultFlags : public QFlags<QSSGLayerRenderPrep
     void setRequiresMipmapsForScreenTexture(bool inValue)
     {
         setFlag(QSSGLayerRenderPreparationResultFlag::RequiresMipmapsForScreenTexture, inValue);
+    }
+
+    bool hasCustomBlendMode() const
+    {
+        return this->operator&(QSSGLayerRenderPreparationResultFlag::MaterialHasCustomBlendMode);
+    }
+    void setHasCustomBlendMode(bool inValue)
+    {
+        setFlag(QSSGLayerRenderPreparationResultFlag::MaterialHasCustomBlendMode, inValue);
     }
 };
 
@@ -223,7 +235,7 @@ public:
                                 QSSGRenderableObjectList &transparentObjects,
                                 QSSGRenderableObjectList &screenTextureObjects,
                                 float lodThreshold = 0.0f);
-    bool prepareParticlesForRender(const RenderableNodeEntries &renderableParticles, const QSSGRenderCameraData &cameraData);
+    bool prepareParticlesForRender(const RenderableNodeEntries &renderableParticles, const QSSGRenderCameraData &cameraData, QSSGLayerRenderPreparationResultFlags &ioFlags);
     bool prepareItem2DsForRender(const QSSGRenderContextInterface &ctxIfc,
                                  const RenderableItem2DEntries &renderableItem2Ds);
 
@@ -267,6 +279,8 @@ public:
     UserPass userPasses[USERPASSES];
     OpaquePass opaquePass;
     TransparentPass transparentPass;
+    OITRenderPass oitRenderPass;
+    OITCompositePass oitCompositePass;
     InfiniteGridPass infiniteGridPass;
     DebugDrawPass debugDrawPass;
 
@@ -304,6 +318,7 @@ public:
 
     bool tooManyLightsWarningShown = false;
     bool tooManyShadowLightsWarningShown = false;
+    bool orderIndependentTransparencyEnabled = false;
 
     QSSGLightmapper *m_lightmapper = nullptr;
 
@@ -495,7 +510,7 @@ private:
     QSSGRenderReflectionMapPtr reflectionMapManager;
     QHash<const QSSGModelContext *, QRhiTexture *> lightmapTextures;
     QHash<const QSSGModelContext *, QRhiTexture *> bonemapTextures;
-    QSSGRhiRenderableTexture renderResults[3] {};
+    QSSGRhiRenderableTexture renderResults[5] {};
     QSSGOITRenderContext oitRenderContext;
 };
 

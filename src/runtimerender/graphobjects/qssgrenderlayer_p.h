@@ -121,6 +121,12 @@ struct Q_QUICK3DRUNTIMERENDER_EXPORT QSSGRenderLayer : public QSSGRenderNode
         F0
     };
 
+    enum class OITMethod : quint8
+    {
+        None = 0,
+        WeightedBlended
+    };
+
     // First effect in a list of effects.
     QSSGRenderEffect *firstEffect;
     QSSGLayerRenderData *renderData = nullptr;
@@ -160,6 +166,7 @@ struct Q_QUICK3DRUNTIMERENDER_EXPORT QSSGRenderLayer : public QSSGRenderNode
     bool ssaaEnabled;
     float ssaaMultiplier;
     bool specularAAEnabled;
+    OITMethod oitMethod;
 
     //TODO: move render state somewhere more suitable
     bool temporalAAIsActive;

@@ -1275,6 +1275,11 @@ QSSGDefaultMaterialPreparationResult QSSGLayerRenderData::prepareDefaultMaterial
         renderableFlags |= QSSGRenderableObjectFlag::RequiresScreenTexture;
     }
 
+    if (renderableFlags.hasTransparency()) {
+        if (orderIndependentTransparencyEnabled)
+            defaultMaterialShaderKeyProperties.m_orderIndependentTransparency.setValue(theGeneratedKey, int(layer.oitMethod));
+    }
+
     retval.firstImage = firstImage;
     if (retval.renderableFlags.isDirty())
         retval.dirty = true;
@@ -1387,7 +1392,8 @@ QSSGDefaultMaterialPreparationResult QSSGLayerRenderData::prepareCustomMaterialF
         ioFlags.setRequiresDepthTexture(true);
         ioFlags.setRequiresSsaoPass(true);
     }
-
+    if (orderIndependentTransparencyEnabled && renderableFlags.hasTransparency())
+        defaultMaterialShaderKeyProperties.m_orderIndependentTransparency.setValue(theGeneratedKey, int(layer.oitMethod));
     retval.firstImage = nullptr;
 
     if (retval.dirty || alreadyDirty)
@@ -1527,6 +1533,24 @@ QRhiTexture *QSSGLayerRenderData::getBonemapTexture(const QSSGModelContext &mode
     }
 
     return ret;
+}
+
+static bool hasCustomBlendMode(const QSSGRenderCustomMaterial &material)
+{
+    // Check SrcOver
+
+    // srcAlpha is same for all
+    if (material.m_srcAlphaBlend != QRhiGraphicsPipeline::One)
+        return true;
+
+    // SrcOver srcColor is SrcAlpha
+    if (material.m_srcBlend != QRhiGraphicsPipeline::SrcAlpha)
+        return true;
+
+    if (material.m_dstBlend == QRhiGraphicsPipeline::OneMinusSrcAlpha
+        && material.m_dstAlphaBlend == QRhiGraphicsPipeline::OneMinusSrcAlpha)
+        return false;
+    return true;
 }
 
 // inModel is const to emphasize the fact that its members cannot be written
@@ -1758,6 +1782,8 @@ bool QSSGLayerRenderData::prepareModelsForRender(QSSGRenderContextInterface &con
                 QSSGRenderableImage *firstImage(theMaterialPrepResult.firstImage);
                 wasDirty |= theMaterialPrepResult.dirty;
                 renderableFlags = theMaterialPrepResult.renderableFlags;
+                if (renderableFlags.hasTransparency())
+                    ioFlags.setHasCustomBlendMode(theMaterial.blendMode != QSSGRenderDefaultMaterial::MaterialBlendMode::SourceOver);
 
                 // Blend particles
                 defaultMaterialShaderKeyProperties.m_blendParticles.setValue(theGeneratedKey, usesBlendParticles);
@@ -1810,6 +1836,9 @@ bool QSSGLayerRenderData::prepareModelsForRender(QSSGRenderContextInterface &con
 
                 const auto &theMaterialSystem(contextInterface.customMaterialSystem());
                 wasDirty |= theMaterialSystem->prepareForRender(theModelContext.model, theSubset, theMaterial);
+
+                if (theMaterial.m_renderFlags.testFlag(QSSGRenderCustomMaterial::RenderFlag::Blending))
+                    ioFlags.setHasCustomBlendMode(!hasCustomBlendMode(theMaterial));
 
                 QSSGDefaultMaterialPreparationResult theMaterialPrepResult(
                         prepareCustomMaterialForRender(theMaterial, renderableFlags, subsetOpacity, wasDirty,
@@ -1910,7 +1939,7 @@ bool QSSGLayerRenderData::prepareModelsForRender(QSSGRenderContextInterface &con
     return wasDirty;
 }
 
-bool QSSGLayerRenderData::prepareParticlesForRender(const RenderableNodeEntries &renderableParticles, const QSSGRenderCameraData &cameraData)
+bool QSSGLayerRenderData::prepareParticlesForRender(const RenderableNodeEntries &renderableParticles, const QSSGRenderCameraData &cameraData, QSSGLayerRenderPreparationResultFlags &ioFlags)
 {
     QSSG_ASSERT(particlesEnabled, return false);
 
@@ -1936,6 +1965,8 @@ bool QSSGLayerRenderData::prepareParticlesForRender(const RenderableNodeEntries 
         renderableFlags.setHasAttributeColor(true);
         renderableFlags.setHasTransparency(particles.m_hasTransparency);
         renderableFlags.setCastsReflections(particles.m_castsReflections);
+        if (particles.m_hasTransparency && particles.m_blendMode != QSSGRenderParticles::BlendMode::SourceOver)
+            ioFlags.setHasCustomBlendMode(true);
 
         float opacity = particles.globalOpacity;
         QVector3D center(particles.m_particleBuffer.bounds().center());
@@ -2204,6 +2235,12 @@ void QSSGLayerRenderData::prepareForRender()
         if (theEffect->requiresDepthTexture)
             requiresDepthTexture = true;
     }
+
+    const auto &rhiCtx = renderer->contextInterface()->rhiContext();
+    orderIndependentTransparencyEnabled = (layer.oitMethod != QSSGRenderLayer::OITMethod::None);
+    if (layer.oitMethod == QSSGRenderLayer::OITMethod::WeightedBlended)
+        orderIndependentTransparencyEnabled = rhiCtx->rhi()->isFeatureSupported(QRhi::PerRenderTargetBlending);
+
     layerPrepResult.flags.setRequiresDepthTexture(requiresDepthTexture);
 
     // Tonemapping. Except when there are effects, then it is up to the
@@ -2216,7 +2253,6 @@ void QSSGLayerRenderData::prepareForRender()
     // if necessary. In practice this is relevant with OpenGL ES 3.0 or
     // 2.0, because there are still implementations in use that only
     // support the spec mandated minimum of 224 vec4s (so 3584 bytes).
-    const auto &rhiCtx = renderer->contextInterface()->rhiContext();
     if (rhiCtx->rhi()->resourceLimit(QRhi::MaxUniformBufferRange) < REDUCED_MAX_LIGHT_COUNT_THRESHOLD_BYTES) {
         features.set(QSSGShaderFeatures::Feature::ReduceMaxNumLights, true);
         static bool notified = false;
@@ -2484,9 +2520,18 @@ void QSSGLayerRenderData::prepareForRender()
         wasDirty |= prepareModelsForRender(*renderer->contextInterface(), renderableModels, layerPrepResult.flags, renderedCameras, getCachedCameraDatas(), modelContexts, opaqueObjects, transparentObjects, screenTextureObjects, meshLodThreshold);
         if (particlesEnabled) {
             const auto &cameraDatas = getCachedCameraDatas();
-            wasDirty |= prepareParticlesForRender(renderableParticles, cameraDatas[0]);
+            wasDirty |= prepareParticlesForRender(renderableParticles, cameraDatas[0], layerPrepResult.flags);
         }
         wasDirty |= prepareItem2DsForRender(*renderer->contextInterface(), renderableItem2Ds);
+    }
+    if (orderIndependentTransparencyEnabled) {
+        // OIT blending mode must be SourceOver and have transparent objects
+        if (transparentObjects.size() > 0 && !layerPrepResult.flags.hasCustomBlendMode()) {
+            if (layer.oitMethod == QSSGRenderLayer::OITMethod::WeightedBlended)
+                layerPrepResult.flags.setRequiresDepthTexture(true);
+        } else {
+            orderIndependentTransparencyEnabled = false;
+        }
     }
 
     prepareReflectionProbesForRender();
@@ -2599,8 +2644,16 @@ void QSSGLayerRenderData::prepareForRender()
         activePasses.push_back(&reflectionPass);
 
     // Note: Transparent pass includeds opaque objects when layerEnableDepthTest is false.
-    if (transparentObjects.size() > 0 || (!layerEnableDepthTest && hasOpaqueObjects))
-        activePasses.push_back(&transparentPass);
+    if (transparentObjects.size() > 0 || (!layerEnableDepthTest && hasOpaqueObjects)) {
+        if (orderIndependentTransparencyEnabled) {
+            activePasses.push_back(&oitRenderPass);
+            activePasses.push_back(&oitCompositePass);
+            oitRenderPass.setMethod(layer.oitMethod);
+            oitCompositePass.setMethod(layer.oitMethod);
+        } else {
+            activePasses.push_back(&transparentPass);
+        }
+    }
 
     auto &overlayPass = userPasses[size_t(QSSGRenderLayer::RenderExtensionStage::Overlay)];
     if (overlayPass.hasData())
@@ -2692,6 +2745,7 @@ QSSGCameraGlobalCalculationResult QSSGLayerRenderPreparationResult::setupCameraF
 QSSGLayerRenderData::QSSGLayerRenderData(QSSGRenderLayer &inLayer, QSSGRenderer &inRenderer)
     : layer(inLayer)
     , renderer(&inRenderer)
+    , orderIndependentTransparencyEnabled(false)
     , particlesEnabled(checkParticleSupport(inRenderer.contextInterface()->rhi()))
 {
 }

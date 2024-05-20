@@ -152,6 +152,8 @@ set(res_resource_files
     "res/effectlib/particles.glsllib"
     "res/effectlib/fog.glsllib"
     "res/effectlib/texturesample.glsllib"
+    "res/effectlib/oitcommon.glsllib"
+    "res/effectlib/orderindependenttransparency.glsllib"
     "res/primitives/Cone.mesh"
     "res/primitives/Cube.mesh"
     "res/primitives/Cylinder.mesh"
@@ -585,6 +587,7 @@ function(_add_particle_shader_group target)
 endfunction()
 
 _add_particle_shader_group(Quick3DRuntimeRender)
+_add_particle_shader_group(Quick3DRuntimeRender GROUPFIX oit_weightedblended ADDITIONAL_DEFINES QSSG_OIT_METHOD=1)
 
 qt_internal_add_shaders(Quick3DRuntimeRender "res_lightmapuvraster_default"
     SILENT
@@ -634,6 +637,25 @@ qt_internal_add_shaders(Quick3DRuntimeRender "res_lightmapuvraster_uv_tangent"
         res/rhishaders/lightmapuvraster_uv_tangent.frag.qsb
     DEFINES
         QSSG_LIGHTMAPUVRASTER_UV_TANGENT
+)
+
+qt_internal_add_shaders(Quick3DRuntimeRender "res_shaders_composite_weightedblended"
+    SILENT
+    PRECOMPILE
+    OPTIMIZED
+    MULTIVIEW
+    PERTARGETCOMPILE
+    GLSL "300es,150"
+    PREFIX
+        "/"
+    FILES
+        res/rhishaders/oitcomposite.vert
+        res/rhishaders/oitcomposite.frag
+    OUTPUTS
+        res/rhishaders/oitcomposite_weightedblended.vert.qsb
+        res/rhishaders/oitcomposite_weightedblended.frag.qsb
+    DEFINES
+        QSSG_OIT_METHOD=1
 )
 
 # special case end

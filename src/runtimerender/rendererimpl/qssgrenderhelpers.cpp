@@ -39,12 +39,13 @@ static QSSGRhiShaderPipelinePtr shadersForDefaultMaterial(QSSGRhiGraphicsPipelin
 }
 
 static QSSGRhiShaderPipelinePtr shadersForParticleMaterial(QSSGRhiGraphicsPipelineState *ps,
-                                                           QSSGParticlesRenderable &particleRenderable)
+                                                           QSSGParticlesRenderable &particleRenderable,
+                                                           QSSGRenderLayer::OITMethod method)
 {
     const auto &renderer(particleRenderable.renderer);
     const auto &shaderCache = renderer->contextInterface()->shaderCache();
     auto featureLevel = particleRenderable.particles.m_featureLevel;
-    const auto &shaderPipeline = shaderCache->getBuiltInRhiShaders().getRhiParticleShader(featureLevel, ps->viewCount);
+    const auto &shaderPipeline = shaderCache->getBuiltInRhiShaders().getRhiParticleShader(featureLevel, ps->viewCount, method);
     if (shaderPipeline)
         QSSGRhiGraphicsPipelineStatePrivate::setShaderPipeline(*ps, shaderPipeline.get());
     return shaderPipeline;
@@ -941,7 +942,8 @@ void RenderHelpers::rhiPrepareRenderable(QSSGRhiContext *rhiCtx,
                                          QSSGRenderCamera *alteredCamera,
                                          QMatrix4x4 *alteredModelViewProjection,
                                          QSSGRenderTextureCubeFace cubeFace,
-                                         QSSGReflectionMapEntry *entry)
+                                         QSSGReflectionMapEntry *entry,
+                                         bool oit)
 {
     const auto &defaultMaterialShaderKeyProperties = inData.getDefaultMaterialPropertyTable();
 
@@ -1045,7 +1047,8 @@ void RenderHelpers::rhiPrepareRenderable(QSSGRhiContext *rhiCtx,
 
             const auto &material = static_cast<const QSSGRenderDefaultMaterial &>(subsetRenderable.getMaterial());
             ps->cullMode = QSSGRhiHelpers::toCullMode(material.cullMode);
-            fillTargetBlend(&ps->targetBlend[0], material.blendMode);
+            if (!oit)
+                fillTargetBlend(&ps->targetBlend[0], material.blendMode);
 
             auto &ia = QSSGRhiInputAssemblerStatePrivate::get(*ps);
 
@@ -1271,7 +1274,7 @@ void RenderHelpers::rhiPrepareRenderable(QSSGRhiContext *rhiCtx,
     case QSSGRenderableObject::Type::Particles:
     {
         QSSGParticlesRenderable &particleRenderable(static_cast<QSSGParticlesRenderable &>(inObject));
-        const auto &shaderPipeline = shadersForParticleMaterial(ps, particleRenderable);
+        const auto &shaderPipeline = shadersForParticleMaterial(ps, particleRenderable, oit ? inData.layer.oitMethod : QSSGRenderLayer::OITMethod::None);
         if (shaderPipeline) {
             QSSGParticleRenderer::rhiPrepareRenderable(*shaderPipeline, passKey, rhiCtx, ps, particleRenderable, inData, renderPassDescriptor, samples, viewCount,
                                                        alteredCamera, cubeFace, entry);

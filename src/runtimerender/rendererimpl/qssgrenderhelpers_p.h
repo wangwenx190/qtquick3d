@@ -119,7 +119,8 @@ Q_QUICK3DRUNTIMERENDER_EXPORT void rhiPrepareRenderable(QSSGRhiContext *rhiCtx,
                                                         QSSGRenderCamera *alteredCamera = nullptr,
                                                         QMatrix4x4 *alteredModelViewProjection = nullptr,
                                                         QSSGRenderTextureCubeFace cubeFace = QSSGRenderTextureCubeFaceNone,
-                                                        QSSGReflectionMapEntry *entry = nullptr);
+                                                        QSSGReflectionMapEntry *entry = nullptr,
+                                                        bool oit = false);
 
 Q_QUICK3DRUNTIMERENDER_EXPORT void rhiRenderRenderable(QSSGRhiContext *rhiCtx,
                                                        const QSSGRhiGraphicsPipelineState &state,

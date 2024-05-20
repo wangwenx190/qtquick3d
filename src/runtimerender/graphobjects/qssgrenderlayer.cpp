@@ -20,6 +20,7 @@ QSSGRenderLayer::QSSGRenderLayer()
     , ssaaEnabled(false)
     , ssaaMultiplier(1.5f)
     , specularAAEnabled(false)
+    , oitMethod(OITMethod::None)
     , tonemapMode(TonemapMode::Linear)
 {
     flags = { FlagT(LocalState::Active) | FlagT(GlobalState::Active) }; // The layer node is alway active and not dirty.
