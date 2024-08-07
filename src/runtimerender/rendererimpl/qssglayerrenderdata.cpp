@@ -1643,6 +1643,10 @@ bool QSSGLayerRenderData::prepareModelsForRender(QSSGRenderContextInterface &con
         QSSGRenderableObjectList bakedLightingObjects;
         bool usesBlendParticles = particlesEnabled && theModelContext.model.particleBuffer != nullptr
                 && model.particleBuffer->particleCount();
+        const bool anyLightHasShadows = std::find_if(lights.begin(),
+                                                     lights.end(),
+                                                     [](const QSSGShaderLight &light) { return light.shadows; })
+                != lights.end();
 
         // Subset(s)
         auto &renderableSubsets = theModelContext.subsets;
@@ -1798,7 +1802,8 @@ bool QSSGLayerRenderData::prepareModelsForRender(QSSGRenderContextInterface &con
                                                                theMaterial,
                                                                firstImage,
                                                                theGeneratedKey,
-                                                               lights);
+                                                               lights,
+                                                               anyLightHasShadows);
                 wasDirty = wasDirty || renderableFlags.isDirty();
             } else if (theMaterialObject->type == QSSGRenderGraphObject::Type::CustomMaterial) {
                 QSSGRenderCustomMaterial &theMaterial(static_cast<QSSGRenderCustomMaterial &>(*theMaterialObject));
@@ -1864,7 +1869,8 @@ bool QSSGLayerRenderData::prepareModelsForRender(QSSGRenderContextInterface &con
                                                                theMaterial,
                                                                firstImage,
                                                                theGeneratedKey,
-                                                               lights);
+                                                               lights,
+                                                               anyLightHasShadows);
             }
             if (theRenderableObject) // NOTE: Should just go in with the ctor args
                 theRenderableObject->camdistSq = getCameraDistanceSq(*theRenderableObject, allCameraData[0]);

@@ -236,6 +236,9 @@ struct QSSGRenderableObject
     const QSSGBounds3 &bounds;
     QSSGBounds3 globalBounds;
 
+    // Used for shadow map bounds when model has instancing
+    QSSGBounds3 globalBoundsInstancing;
+
     QSSGRenderableObjectFlags renderableFlags;
     // For rough sorting for transparency and for depth
     QVector3D worldCenterPoint;
@@ -371,7 +374,8 @@ struct Q_QUICK3DRUNTIMERENDER_EXPORT QSSGSubsetRenderable : public QSSGRenderabl
                          const QSSGRenderGraphObject &mat,
                          QSSGRenderableImage *inFirstImage,
                          QSSGShaderDefaultMaterialKey inShaderKey,
-                         const QSSGShaderLightListView &inLights);
+                         const QSSGShaderLightListView &inLights,
+                         bool anyLightHasShadows);
 
     [[nodiscard]] const QSSGRenderGraphObject &getMaterial() const { return material; }
 };
