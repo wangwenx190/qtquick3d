@@ -2,24 +2,24 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
 cmake_minimum_required(VERSION 3.16)
-project(stenciloutline LANGUAGES CXX)
+project(stenciloutline3d LANGUAGES CXX)
 
 set(CMAKE_AUTOMOC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Quick Quick3D)
 
-qt_add_executable(stenciloutline
+qt_add_executable(stenciloutline3d
     main.cpp
 )
 
-set(stenciloutline_uri "QtQuick3D.Examples.OutlineRenderExtension")
+set(stenciloutline3d_uri "QtQuick3D.Examples.OutlineRenderExtension")
 
-set_target_properties(stenciloutline PROPERTIES
+set_target_properties(stenciloutline3d PROPERTIES
     WIN32_EXECUTABLE TRUE
     MACOSX_BUNDLE TRUE
 )
 
-target_link_libraries(stenciloutline PUBLIC
+target_link_libraries(stenciloutline3d PUBLIC
         Qt::Gui
         Qt::Quick
         Qt::Quick3D
@@ -43,9 +43,9 @@ set(mesh_resource_files
     "models/suzanne.mesh"
 )
 
-qt_add_qml_module(stenciloutline
+qt_add_qml_module(stenciloutline3d
     VERSION 1.0
-    URI ${stenciloutline_uri}
+    URI ${stenciloutline3d_uri}
     QML_FILES
         ${qml_resource_files}
     RESOURCES
@@ -56,19 +56,19 @@ qt_add_qml_module(stenciloutline
     NO_PLUGIN
 )
 
-qt_add_shaders(stenciloutline "baked-shaders"
+qt_add_shaders(stenciloutline3d "baked-shaders"
     FILES
         "shaders/huesaturation.frag"
 )
 
-install(TARGETS stenciloutline
+install(TARGETS stenciloutline3d
     BUNDLE  DESTINATION .
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
 
 qt_generate_deploy_qml_app_script(
-    TARGET stenciloutline
+    TARGET stenciloutline3d
     OUTPUT_SCRIPT deploy_script
     MACOS_BUNDLE_POST_BUILD
     NO_UNSUPPORTED_PLATFORM_ERROR
