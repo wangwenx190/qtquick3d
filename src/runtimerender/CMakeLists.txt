@@ -496,112 +496,81 @@ qt_internal_add_shaders(Quick3DRuntimeRender "res_shaders_skybox_rgbe_filmic"
         QSSG_ENABLE_FILMIC_TONEMAPPING=1
         QSSG_ENABLE_RGBE_LIGHT_PROBE=1
 )
-# Shaders without lights
-qt_internal_add_shaders(Quick3DRuntimeRender "res_shaders_particles_nolight"
-    SILENT
-    PRECOMPILE
-    OPTIMIZED
-    MULTIVIEW
-    GLSL "300es,150"
-    PREFIX
-        "/"
-    FILES
-        res/rhishaders/particles.vert
-        res/rhishaders/particles.frag
-    OUTPUTS
-        res/rhishaders/particlesnolightsimple.vert.qsb
-        res/rhishaders/particlesnolightsimple.frag.qsb
-)
-qt_internal_add_shaders(Quick3DRuntimeRender "res_shaders_particles_nolight_mapped"
-    SILENT
-    PRECOMPILE
-    OPTIMIZED
-    MULTIVIEW
-    GLSL "300es,150"
-    PREFIX
-        "/"
-    FILES
-        res/rhishaders/particles.vert
-        res/rhishaders/particles.frag
-    OUTPUTS
-        res/rhishaders/particlesnolightmapped.vert.qsb
-        res/rhishaders/particlesnolightmapped.frag.qsb
-    DEFINES
-        QSSG_PARTICLES_ENABLE_MAPPED
-)
-qt_internal_add_shaders(Quick3DRuntimeRender "res_shaders_particles_nolight_animated"
-    SILENT
-    PRECOMPILE
-    OPTIMIZED
-    MULTIVIEW
-    GLSL "300es,150"
-    PREFIX
-        "/"
-    FILES
-        res/rhishaders/particles.vert
-        res/rhishaders/particles.frag
-    OUTPUTS
-        res/rhishaders/particlesnolightanimated.vert.qsb
-        res/rhishaders/particlesnolightanimated.frag.qsb
-    DEFINES
-        QSSG_PARTICLES_ENABLE_MAPPED
-        QSSG_PARTICLES_ENABLE_ANIMATED
-)
-# Shaders with lights
-qt_internal_add_shaders(Quick3DRuntimeRender "res_shaders_particles_vlight"
-    SILENT
-    PRECOMPILE
-    OPTIMIZED
-    MULTIVIEW
-    GLSL "300es,150"
-    PREFIX
-        "/"
-    FILES
-        res/rhishaders/particles.vert
-        res/rhishaders/particles.frag
-    OUTPUTS
-        res/rhishaders/particlesvlightsimple.vert.qsb
-        res/rhishaders/particlesvlightsimple.frag.qsb
-    DEFINES
-        QSSG_PARTICLES_ENABLE_VERTEX_LIGHTING
-)
-qt_internal_add_shaders(Quick3DRuntimeRender "res_shaders_particles_vlight_mapped"
-    SILENT
-    PRECOMPILE
-    OPTIMIZED
-    MULTIVIEW
-    GLSL "300es,150"
-    PREFIX
-        "/"
-    FILES
-        res/rhishaders/particles.vert
-        res/rhishaders/particles.frag
-    OUTPUTS
-        res/rhishaders/particlesvlightmapped.vert.qsb
-        res/rhishaders/particlesvlightmapped.frag.qsb
-    DEFINES
-        QSSG_PARTICLES_ENABLE_MAPPED
-        QSSG_PARTICLES_ENABLE_VERTEX_LIGHTING
-)
-qt_internal_add_shaders(Quick3DRuntimeRender "res_shaders_particles_vlight_animated"
-    SILENT
-    PRECOMPILE
-    OPTIMIZED
-    MULTIVIEW
-    GLSL "300es,150"
-    PREFIX
-        "/"
-    FILES
-        res/rhishaders/particles.vert
-        res/rhishaders/particles.frag
-    OUTPUTS
-        res/rhishaders/particlesvlightanimated.vert.qsb
-        res/rhishaders/particlesvlightanimated.frag.qsb
-    DEFINES
-        QSSG_PARTICLES_ENABLE_MAPPED
-        QSSG_PARTICLES_ENABLE_ANIMATED
-        QSSG_PARTICLES_ENABLE_VERTEX_LIGHTING
-)
+
+function(_add_particle_shader target)
+    cmake_parse_arguments(
+        arg
+        ""
+        "POSTFIX;INPUT;OUTPUT"
+        "DEFINES;ADDITIONAL_DEFINES"
+        ${ARGN}
+    )
+
+    set(DEFS ${arg_DEFINES})
+    if (arg_ADDITIONAL_DEFINES)
+        list(APPEND DEFS ${arg_ADDITIONAL_DEFINES})
+    endif()
+
+    qt_internal_add_shaders(${target} "res_shaders_${arg_POSTFIX}"
+        SILENT
+        PRECOMPILE
+        OPTIMIZED
+        MULTIVIEW
+        GLSL "300es,150"
+        PREFIX
+            "/"
+        FILES
+            res/rhishaders/${arg_INPUT}.vert
+            res/rhishaders/${arg_INPUT}.frag
+        OUTPUTS
+            res/rhishaders/${arg_INPUT}_${arg_OUTPUT}.vert.qsb
+            res/rhishaders/${arg_INPUT}_${arg_OUTPUT}.frag.qsb
+        DEFINES
+            ${DEFS}
+    )
+endfunction()
+
+function(_add_particle_shader_group target)
+    cmake_parse_arguments(
+        arg
+        ""
+        "GROUPFIX"
+        "ADDITIONAL_DEFINES"
+        ${ARGN}
+    )
+    if (arg_ADDITIONAL_DEFINES)
+        _add_particle_shader(${target} INPUT particles OUTPUT nolight_simple_${arg_GROUPFIX} POSTFIX particlesnolight${arg_GROUPFIX} ADDITIONAL_DEFINES ${arg_ADDITIONAL_DEFINES})
+        _add_particle_shader(${target} INPUT particles OUTPUT nolight_mapped_${arg_GROUPFIX} POSTFIX particlesnolightmapped${arg_GROUPFIX} DEFINES QSSG_PARTICLES_ENABLE_MAPPED ADDITIONAL_DEFINES ${arg_ADDITIONAL_DEFINES})
+        _add_particle_shader(${target} INPUT particles OUTPUT nolight_animated_${arg_GROUPFIX} POSTFIX particlesnolightanimated${arg_GROUPFIX} DEFINES QSSG_PARTICLES_ENABLE_MAPPED QSSG_PARTICLES_ENABLE_ANIMATED ADDITIONAL_DEFINES ${arg_ADDITIONAL_DEFINES})
+        _add_particle_shader(${target} INPUT particles OUTPUT vlight_${arg_GROUPFIX} POSTFIX particlesvlightsimple${arg_GROUPFIX} DEFINES QSSG_PARTICLES_ENABLE_VERTEX_LIGHTING ADDITIONAL_DEFINES ${arg_ADDITIONAL_DEFINES})
+        _add_particle_shader(${target} INPUT particles OUTPUT vlight_mapped_${arg_GROUPFIX} POSTFIX particlesvlightmapped${arg_GROUPFIX} DEFINES QSSG_PARTICLES_ENABLE_MAPPED QSSG_PARTICLES_ENABLE_VERTEX_LIGHTING ADDITIONAL_DEFINES ${arg_ADDITIONAL_DEFINES})
+        _add_particle_shader(${target} INPUT particles OUTPUT vlight_animated_${arg_GROUPFIX} POSTFIX particlesvlightanimated${arg_GROUPFIX} DEFINES QSSG_PARTICLES_ENABLE_MAPPED QSSG_PARTICLES_ENABLE_ANIMATED QSSG_PARTICLES_ENABLE_VERTEX_LIGHTING ADDITIONAL_DEFINES ${arg_ADDITIONAL_DEFINES})
+
+        _add_particle_shader(${target} INPUT lineparticles OUTPUT nolight_simple_${arg_GROUPFIX} POSTFIX lineparticles${arg_GROUPFIX} ADDITIONAL_DEFINES ${arg_ADDITIONAL_DEFINES})
+        _add_particle_shader(${target} INPUT lineparticles OUTPUT nolight_mapped_${arg_GROUPFIX} POSTFIX lineparticlestmapped${arg_GROUPFIX} DEFINES QSSG_PARTICLES_ENABLE_MAPPED ADDITIONAL_DEFINES ${arg_ADDITIONAL_DEFINES})
+        _add_particle_shader(${target} INPUT lineparticles OUTPUT nolight_animated_${arg_GROUPFIX} POSTFIX lineparticlesanimated${arg_GROUPFIX} DEFINES QSSG_PARTICLES_ENABLE_MAPPED QSSG_PARTICLES_ENABLE_ANIMATED ADDITIONAL_DEFINES ${arg_ADDITIONAL_DEFINES})
+        _add_particle_shader(${target} INPUT lineparticles OUTPUT vlight_simple_${arg_GROUPFIX} POSTFIX lineparticlesvlightsimple${arg_GROUPFIX} DEFINES QSSG_PARTICLES_ENABLE_VERTEX_LIGHTING ADDITIONAL_DEFINES ${arg_ADDITIONAL_DEFINES})
+        _add_particle_shader(${target} INPUT lineparticles OUTPUT vlight_mapped_${arg_GROUPFIX} POSTFIX lineparticlesvlightmapped${arg_GROUPFIX} DEFINES QSSG_PARTICLES_ENABLE_MAPPED QSSG_PARTICLES_ENABLE_VERTEX_LIGHTING ADDITIONAL_DEFINES ${arg_ADDITIONAL_DEFINES})
+        _add_particle_shader(${target} INPUT lineparticles OUTPUT vlight_animated_${arg_GROUPFIX} POSTFIX lineparticlesvlightanimated${arg_GROUPFIX} DEFINES QSSG_PARTICLES_ENABLE_MAPPED QSSG_PARTICLES_ENABLE_ANIMATED QSSG_PARTICLES_ENABLE_VERTEX_LIGHTING ADDITIONAL_DEFINES ${arg_ADDITIONAL_DEFINES})
+    else()
+        _add_particle_shader(${target} INPUT particles OUTPUT nolight_simple POSTFIX particlesnolight)
+        _add_particle_shader(${target} INPUT particles OUTPUT nolight_mapped POSTFIX particlesnolightmapped DEFINES QSSG_PARTICLES_ENABLE_MAPPED)
+        _add_particle_shader(${target} INPUT particles OUTPUT nolight_animated POSTFIX particlesnolightanimated DEFINES QSSG_PARTICLES_ENABLE_MAPPED QSSG_PARTICLES_ENABLE_ANIMATED)
+        _add_particle_shader(${target} INPUT particles OUTPUT vlight_simple POSTFIX particlesvlightsimple DEFINES QSSG_PARTICLES_ENABLE_VERTEX_LIGHTING)
+        _add_particle_shader(${target} INPUT particles OUTPUT vlight_mapped POSTFIX particlesvlightmapped DEFINES QSSG_PARTICLES_ENABLE_MAPPED QSSG_PARTICLES_ENABLE_VERTEX_LIGHTING)
+        _add_particle_shader(${target} INPUT particles OUTPUT vlight_animated POSTFIX particlesvlightanimated DEFINES QSSG_PARTICLES_ENABLE_MAPPED QSSG_PARTICLES_ENABLE_ANIMATED QSSG_PARTICLES_ENABLE_VERTEX_LIGHTING)
+
+        _add_particle_shader(${target} INPUT lineparticles OUTPUT nolight_simple POSTFIX lineparticles)
+        _add_particle_shader(${target} INPUT lineparticles OUTPUT nolight_mapped POSTFIX lineparticlestmapped DEFINES QSSG_PARTICLES_ENABLE_MAPPED)
+        _add_particle_shader(${target} INPUT lineparticles OUTPUT nolight_animated POSTFIX lineparticlesanimated DEFINES QSSG_PARTICLES_ENABLE_MAPPED QSSG_PARTICLES_ENABLE_ANIMATED)
+        _add_particle_shader(${target} INPUT lineparticles OUTPUT vlight_simple POSTFIX lineparticlesvlightsimple DEFINES QSSG_PARTICLES_ENABLE_VERTEX_LIGHTING)
+        _add_particle_shader(${target} INPUT lineparticles OUTPUT vlight_mapped POSTFIX lineparticlesvlightmapped DEFINES QSSG_PARTICLES_ENABLE_MAPPED QSSG_PARTICLES_ENABLE_VERTEX_LIGHTING)
+        _add_particle_shader(${target} INPUT lineparticles OUTPUT vlight_animated POSTFIX lineparticlesvlightanimated DEFINES QSSG_PARTICLES_ENABLE_MAPPED QSSG_PARTICLES_ENABLE_ANIMATED QSSG_PARTICLES_ENABLE_VERTEX_LIGHTING)
+    endif()
+endfunction()
+
+_add_particle_shader_group(Quick3DRuntimeRender)
+
 qt_internal_add_shaders(Quick3DRuntimeRender "res_lightmapuvraster_default"
     SILENT
     PRECOMPILE
@@ -651,110 +620,7 @@ qt_internal_add_shaders(Quick3DRuntimeRender "res_lightmapuvraster_uv_tangent"
     DEFINES
         QSSG_LIGHTMAPUVRASTER_UV_TANGENT
 )
-qt_internal_add_shaders(Quick3DRuntimeRender "res_shaders_line_particles"
-    SILENT
-    PRECOMPILE
-    OPTIMIZED
-    MULTIVIEW
-    GLSL "300es,150"
-    PREFIX
-        "/"
-    FILES
-        res/rhishaders/lineparticles.vert
-        res/rhishaders/lineparticles.frag
-    OUTPUTS
-        res/rhishaders/lineparticles.vert.qsb
-        res/rhishaders/lineparticles.frag.qsb
-)
-qt_internal_add_shaders(Quick3DRuntimeRender "res_shaders_line_particles_mapped"
-    SILENT
-    PRECOMPILE
-    OPTIMIZED
-    MULTIVIEW
-    GLSL "300es,150"
-    PREFIX
-        "/"
-    FILES
-        res/rhishaders/lineparticles.vert
-        res/rhishaders/lineparticles.frag
-    OUTPUTS
-        res/rhishaders/lineparticlesmapped.vert.qsb
-        res/rhishaders/lineparticlesmapped.frag.qsb
-    DEFINES
-        QSSG_PARTICLES_ENABLE_MAPPED
-)
-qt_internal_add_shaders(Quick3DRuntimeRender "res_shaders_line_particles_animated"
-    SILENT
-    PRECOMPILE
-    OPTIMIZED
-    MULTIVIEW
-    GLSL "300es,150"
-    PREFIX
-        "/"
-    FILES
-        res/rhishaders/lineparticles.vert
-        res/rhishaders/lineparticles.frag
-    OUTPUTS
-        res/rhishaders/lineparticlesanimated.vert.qsb
-        res/rhishaders/lineparticlesanimated.frag.qsb
-    DEFINES
-        QSSG_PARTICLES_ENABLE_MAPPED
-        QSSG_PARTICLES_ENABLE_ANIMATED
-)
-qt_internal_add_shaders(Quick3DRuntimeRender "res_shaders_line_particles_vlight"
-    SILENT
-    PRECOMPILE
-    OPTIMIZED
-    MULTIVIEW
-    GLSL "300es,150"
-    PREFIX
-        "/"
-    FILES
-        res/rhishaders/lineparticles.vert
-        res/rhishaders/lineparticles.frag
-    OUTPUTS
-        res/rhishaders/lineparticlesvlightsimple.vert.qsb
-        res/rhishaders/lineparticlesvlightsimple.frag.qsb
-    DEFINES
-        QSSG_PARTICLES_ENABLE_VERTEX_LIGHTING
-)
-qt_internal_add_shaders(Quick3DRuntimeRender "res_shaders_line_particles_vlight_mapped"
-    SILENT
-    PRECOMPILE
-    OPTIMIZED
-    MULTIVIEW
-    GLSL "300es,150"
-    PREFIX
-        "/"
-    FILES
-        res/rhishaders/lineparticles.vert
-        res/rhishaders/lineparticles.frag
-    OUTPUTS
-        res/rhishaders/lineparticlesvlightmapped.vert.qsb
-        res/rhishaders/lineparticlesvlightmapped.frag.qsb
-    DEFINES
-        QSSG_PARTICLES_ENABLE_MAPPED
-        QSSG_PARTICLES_ENABLE_VERTEX_LIGHTING
-)
-qt_internal_add_shaders(Quick3DRuntimeRender "res_shaders_line_particles_vlight_animated"
-    SILENT
-    PRECOMPILE
-    OPTIMIZED
-    MULTIVIEW
-    GLSL "300es,150"
-    PREFIX
-        "/"
-    FILES
-        res/rhishaders/lineparticles.vert
-        res/rhishaders/lineparticles.frag
-    OUTPUTS
-        res/rhishaders/lineparticlesvlightanimated.vert.qsb
-        res/rhishaders/lineparticlesvlightanimated.frag.qsb
-    DEFINES
-        QSSG_PARTICLES_ENABLE_MAPPED
-        QSSG_PARTICLES_ENABLE_ANIMATED
-        QSSG_PARTICLES_ENABLE_VERTEX_LIGHTING
-)
+
 # special case end
 
 #### Keys ignored in scope 1:.:.:runtimerender.pro:<TRUE>:
