@@ -164,6 +164,19 @@ struct QSSGBakedLightingModel
     QVector<QSSGRenderableObjectHandle> renderables;
 };
 
+struct QSSGOITRenderContext
+{
+    QRhiTextureRenderTarget *oitRenderTarget = nullptr;
+    QRhiRenderPassDescriptor *renderPassDescriptor = nullptr;
+    void reset()
+    {
+        delete oitRenderTarget;
+        delete renderPassDescriptor;
+        oitRenderTarget = nullptr;
+        renderPassDescriptor = nullptr;
+    }
+};
+
 class Q_QUICK3DRUNTIMERENDER_EXPORT QSSGLayerRenderData
 {
 public:
@@ -339,6 +352,8 @@ public:
     const QSSGRenderShadowMapPtr &getShadowMapManager() const { return shadowMapManager; }
     const QSSGRenderReflectionMapPtr &getReflectionMapManager() const { return reflectionMapManager; }
 
+    QSSGOITRenderContext &getOitRenderContext() { return oitRenderContext; }
+
     static bool prepareInstancing(QSSGRhiContext *rhiCtx,
                                   QSSGSubsetRenderable *renderable,
                                   const QVector3D &cameraDirection,
@@ -481,6 +496,7 @@ private:
     QHash<const QSSGModelContext *, QRhiTexture *> lightmapTextures;
     QHash<const QSSGModelContext *, QRhiTexture *> bonemapTextures;
     QSSGRhiRenderableTexture renderResults[3] {};
+    QSSGOITRenderContext oitRenderContext;
 };
 
 QT_END_NAMESPACE

@@ -2704,6 +2704,7 @@ QSSGLayerRenderData::~QSSGLayerRenderData()
 
     for (auto &renderResult : renderResults)
         renderResult.reset();
+    oitRenderContext.reset();
 }
 
 static void sortInstances(QByteArray &sortedData, QList<QSSGRhiSortData> &sortData, const void *instances,
