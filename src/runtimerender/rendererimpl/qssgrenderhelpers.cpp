@@ -17,6 +17,8 @@
 
 #include <QtCore/qbitarray.h>
 
+#include <cmath>
+
 QT_BEGIN_NAMESPACE
 
 static constexpr float QSSG_PI = float(M_PI);
@@ -213,6 +215,8 @@ static std::unique_ptr<QSSGRenderCamera> computeShadowCameraFromFrustum(const QS
                                                                         float clipRange,
                                                                         float frustumStartT,
                                                                         float frustumEndT,
+                                                                        float frustumRadius,
+                                                                        bool lockShadowmapTexels,
                                                                         const QSSGBounds3 &castingBox,
                                                                         const QSSGBounds3 &receivingBox,
                                                                         QSSGDebugDrawSystem *debugDrawSystem,
@@ -275,10 +279,26 @@ static std::unique_ptr<QSSGRenderCamera> computeShadowCameraFromFrustum(const QS
     QVector3D boundsDims = castReceiveBounds.dimensions();
     boundsDims.setZ(boundsDims.z() * 1.01f); // Expand slightly in z direction to avoid pancaking precision errors
 
-    // We expand the shadowmap to cover the bounds with one extra texel on all sides
-    const float texelExpandFactor = shadowMapResolution / (shadowMapResolution - 2);
+    if (lockShadowmapTexels) {
+        // Calculate center position aligned to texel size to avoid shimmering
+        const float diam = (pcfRadius + frustumRadius) * 2.0f;
+        const float texelsPerUnit = diam / shadowMapResolution;
+        QVector3D centerLight = lightMatrix.map(boundsCenterWorld);
+        float x = centerLight.x();
+        float y = centerLight.y();
+        float z = centerLight.z();
+        centerLight = QVector3D(int(x / texelsPerUnit), int(y / texelsPerUnit), int(z / texelsPerUnit)) * texelsPerUnit;
+        boundsCenterWorld = lightMatrixInverted.map(centerLight);
+        boundsDims.setX(diam);
+        boundsDims.setY(diam);
+    } else {
+        // We expand the shadowmap to cover the bounds with one extra texel on all sides
+        const float texelExpandFactor = shadowMapResolution / (shadowMapResolution - 2);
+        boundsDims.setX(boundsDims.x() * texelExpandFactor);
+        boundsDims.setY(boundsDims.y() * texelExpandFactor);
+    }
 
-    QRectF theViewport(0.0f, 0.0f, boundsDims.x() * texelExpandFactor, boundsDims.y() * texelExpandFactor);
+    QRectF theViewport(0.0f, 0.0f, boundsDims.x(), boundsDims.y());
 
     auto camera = std::make_unique<QSSGRenderCamera>(QSSGRenderGraphObject::Type::OrthographicCamera);
     camera->clipNear = -0.5f * boundsDims.z();
@@ -300,6 +320,7 @@ static QVarLengthArray<std::unique_ptr<QSSGRenderCamera>, 4> setupCascadingCamer
                                                                                                const float pcfRadius,
                                                                                                const QSSGBounds3 &castingObjectsBox,
                                                                                                const QSSGBounds3 &receivingObjectsBox,
+                                                                                               bool lockShadowmapTexels,
                                                                                                QSSGDebugDrawSystem *debugDrawSystem,
                                                                                                bool drawCascades,
                                                                                                bool drawSceneCascadeIntersection)
@@ -323,7 +344,40 @@ static QVarLengthArray<std::unique_ptr<QSSGRenderCamera>, 4> setupCascadingCamer
     lightMatrix.setRow(3, QVector4D(0.0f, 0.0f, 0.0f, 1.0f));
     QMatrix4x4 lightMatrixInverted = lightMatrix.inverted();
 
-    const float clipRange = qMax(2.0f, qMin(inLight->m_shadowMapFar, inCamera.clipFar)) - 1.0f;
+    const float clipFar = qMax(2.0f, qMin(inLight->m_shadowMapFar, inCamera.clipFar));
+    constexpr float clipNear = 1.0f;
+    const float clipRange = clipFar - clipNear;
+
+    // We calculate the radius of the cascade without rotation or translation so we always get
+    // the same floating point value.
+    const auto calcFrustumRadius = [&](float t0, float t1) -> float {
+        const float f = clipNear + clipRange * t1;
+        const float n = clipNear + clipRange * t0;
+        QMatrix4x4 proj = inCamera.projection;
+        proj(2, 2) = -(f + n) / (f - n);
+        proj(2, 3) = -2 * f * n / (f - n);
+        bool invertible = false;
+        QMatrix4x4 inv = proj.inverted(&invertible);
+        Q_ASSERT(invertible);
+
+        QSSGBoxPoints pts = { inv.map(QVector3D(-1, -1, -1)), inv.map(QVector3D(+1, -1, -1)),
+                              inv.map(QVector3D(+1, +1, -1)), inv.map(QVector3D(-1, +1, -1)),
+                              inv.map(QVector3D(-1, -1, +1)), inv.map(QVector3D(+1, -1, +1)),
+                              inv.map(QVector3D(+1, +1, +1)), inv.map(QVector3D(-1, +1, +1)) };
+
+        QVector3D center = QVector3D(0.f, 0.f, 0.f);
+        for (QVector3D point : pts) {
+            center += point;
+        }
+        center = center * 0.125f;
+
+        float radiusSquared = 0;
+        for (QVector3D point : pts) {
+            radiusSquared = qMax(radiusSquared, (point - center).lengthSquared());
+        }
+
+        return std::sqrt(radiusSquared);
+    };
 
     const auto computeSplitRanges = [inLight](const QVarLengthArray<float, 3> &splits) -> QVarLengthArray<QPair<float, float>, 4> {
         QVarLengthArray<QPair<float, float>, 4> ranges;
@@ -340,6 +394,7 @@ static QVarLengthArray<std::unique_ptr<QSSGRenderCamera>, 4> setupCascadingCamer
 
     const auto computeFrustums = [&](const QVarLengthArray<float, 3> &splits) {
         for (const auto &range : computeSplitRanges(splits)) {
+            const float frustumRadius = lockShadowmapTexels ? calcFrustumRadius(range.first, range.second) : 0.0f;
             auto camera = computeShadowCameraFromFrustum(inCamera,
                                                          lightMatrix,
                                                          lightMatrixInverted,
@@ -351,6 +406,8 @@ static QVarLengthArray<std::unique_ptr<QSSGRenderCamera>, 4> setupCascadingCamer
                                                          clipRange,
                                                          range.first,
                                                          range.second,
+                                                         frustumRadius,
+                                                         lockShadowmapTexels,
                                                          castingObjectsBox,
                                                          receivingObjectsBox,
                                                          debugDrawSystem,
@@ -1448,6 +1505,7 @@ void RenderHelpers::rhiRenderShadowMap(QSSGRhiContext *rhiCtx,
                                                              pcfRadius,
                                                              castingObjectsBox,
                                                              receivingObjectsBox,
+                                                             light->m_lockShadowmapTexels,
                                                              debugDrawSystem,
                                                              drawCascades,
                                                              drawSceneCascadeIntersection);

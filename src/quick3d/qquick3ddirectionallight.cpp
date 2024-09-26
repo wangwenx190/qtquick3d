@@ -154,6 +154,15 @@ QT_BEGIN_NAMESPACE
     Default value: \c{0.05}
 */
 
+/*!
+    \qmlproperty bool DirectionalLight::lockShadowmapTexels
+    When this property is enabled, the shadowmap texels are "locked" in position in the
+    world eliminating shadow edge shimmering at the cost of bigger shadowmap texels.
+    It works by using uniform sized, and texel aligned shadowmaps for each cascade.
+
+    Default value: \c{false}
+*/
+
 QQuick3DDirectionalLight::QQuick3DDirectionalLight(QQuick3DNode *parent)
     : QQuick3DAbstractLight(*(new QQuick3DNodePrivate(QQuick3DNodePrivate::Type::DirectionalLight)), parent) {}
 
@@ -180,6 +189,11 @@ int QQuick3DDirectionalLight::csmNumSplits() const
 float QQuick3DDirectionalLight::csmBlendRatio() const
 {
     return m_csmBlendRatio;
+}
+
+bool QQuick3DDirectionalLight::lockShadowmapTexels() const
+{
+    return m_lockShadowmapTexels;
 }
 
 void QQuick3DDirectionalLight::setCsmSplit1(float newcsmSplit1)
@@ -242,6 +256,17 @@ void QQuick3DDirectionalLight::setCsmBlendRatio(float newcsmBlendRatio)
     update();
 }
 
+void QQuick3DDirectionalLight::setLockShadowmapTexels(bool newLockShadowmapTexels)
+{
+    if (m_lockShadowmapTexels == newLockShadowmapTexels)
+        return;
+
+    m_lockShadowmapTexels = newLockShadowmapTexels;
+    emit lockShadowmapTexelsChanged();
+    m_dirtyFlags.setFlag(QQuick3DAbstractLight::DirtyFlag::ShadowDirty);
+    update();
+}
+
 QSSGRenderGraphObject *QQuick3DDirectionalLight::updateSpatialNode(QSSGRenderGraphObject *node)
 {
     if (!node) {
@@ -256,6 +281,7 @@ QSSGRenderGraphObject *QQuick3DDirectionalLight::updateSpatialNode(QSSGRenderGra
         light->m_csmSplit3 = m_csmSplit3;
         light->m_csmNumSplits = m_csmNumSplits;
         light->m_csmBlendRatio = m_csmBlendRatio;
+        light->m_lockShadowmapTexels = m_lockShadowmapTexels;
     }
 
     QQuick3DAbstractLight::updateSpatialNode(node); // Marks the light node dirty if m_dirtyFlags != 0

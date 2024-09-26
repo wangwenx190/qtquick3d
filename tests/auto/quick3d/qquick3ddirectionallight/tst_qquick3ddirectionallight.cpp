@@ -114,6 +114,11 @@ void tst_QQuick3DDirectionalLight::testProperties()
     QCOMPARE(light.csmSplit2(), splits[1]);
     QCOMPARE(light.csmSplit3(), splits[2]);
 
+    QCOMPARE(light.lockShadowmapTexels(), false);
+    light.setLockShadowmapTexels(true);
+    node = static_cast<QSSGRenderLight *>(light.updateSpatialNode(node));
+    QCOMPARE(light.lockShadowmapTexels(), true);
+
     light.setCastsShadow(true);
     node = static_cast<QSSGRenderLight *>(light.updateSpatialNode(node));
     QVERIFY(node->m_castShadow);
