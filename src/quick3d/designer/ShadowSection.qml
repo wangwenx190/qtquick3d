@@ -157,5 +157,23 @@ Section {
 
             ExpandingSpacer {}
         }
+
+        PropertyLabel {
+            visible: shadowCheckBox.checked
+            text: qsTr("Use 32-bit Shadowmap")
+            tooltip: qsTr("Enables a 32-bit shadowmap texture for this light.")
+        }
+
+        SecondColumnLayout {
+            visible: shadowCheckBox.checked
+            CheckBox {
+                text: backendValues.use32BitShadowmap.valueToString
+                backendValue: backendValues.use32BitShadowmap
+                implicitWidth: StudioTheme.Values.twoControlColumnWidth
+                               + StudioTheme.Values.actionIndicatorWidth
+            }
+
+            ExpandingSpacer {}
+        }
     }
 }

@@ -120,6 +120,10 @@ void tst_QQuick3DDirectionalLight::testProperties()
     light.setCastsShadow(false);
     node = static_cast<QSSGRenderLight *>(light.updateSpatialNode(node));
     QVERIFY(!node->m_castShadow);
+    QVERIFY(!node->m_use32BitShadowmap);
+    light.setUse32BitShadowmap(true);
+    node = static_cast<QSSGRenderLight *>(light.updateSpatialNode(node));
+    QVERIFY(node->m_use32BitShadowmap);
 
     QColor color1("#12345678");
     QVector3D color1Vec3 = QSSGUtils::color::sRGBToLinear(color1).toVector3D();

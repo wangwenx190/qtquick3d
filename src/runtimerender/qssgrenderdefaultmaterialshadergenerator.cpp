@@ -249,7 +249,7 @@ static void addTranslucencyIrradiance(QSSGStageGeneratorBase &infragmentShader,
 using ShadowNameMap = QHash<QPair<qsizetype, quint32>, QSSGMaterialShaderGenerator::ShadowVariableNames>;
 Q_GLOBAL_STATIC(ShadowNameMap, q3ds_shadowMapVariableNames);
 
-static const QSSGMaterialShaderGenerator::ShadowVariableNames& setupShadowMapVariableNames(qsizetype lightIdx, quint32 shadowMapRes)
+static const QSSGMaterialShaderGenerator::ShadowVariableNames& setupShadowMapVariableNames(qsizetype lightIdx, quint32 shadowMapRes, bool is32bit)
 {
     QSSGMaterialShaderGenerator::ShadowVariableNames &names = (*q3ds_shadowMapVariableNames)[{lightIdx, shadowMapRes}];
     if (names.shadowMapTexture.isEmpty()) {
@@ -260,7 +260,7 @@ static const QSSGMaterialShaderGenerator::ShadowVariableNames& setupShadowMapVar
         names.shadowData = QByteArrayLiteral("ubShadows.shadowData");
         std::snprintf(buf, sizeof buf, "[%lld]", qlonglong(lightIdx));
         names.shadowData.append(buf);
-        names.shadowMapTexture = QByteArrayLiteral("qt_shadowmap_texture_");
+        names.shadowMapTexture = is32bit ? QByteArrayLiteral("qt_shadowmap_texture_32_") : QByteArrayLiteral("qt_shadowmap_texture_16_");
         std::snprintf(buf, sizeof buf, "%d", shadowMapRes);
         names.shadowMapTexture.append(buf);
     }
@@ -348,6 +348,7 @@ static void generateShadowMapOcclusion(QSSGStageGeneratorBase &fragmentShader,
                                        QSSGMaterialVertexPipeline &vertexShader,
                                        quint32 lightIdx,
                                        quint32 shadowMapRes,
+                                       bool is32bit,
                                        QSSGRenderLight::SoftShadowQuality softShadowQuality,
                                        bool inShadowEnabled,
                                        QSSGRenderLight::Type inType,
@@ -356,7 +357,7 @@ static void generateShadowMapOcclusion(QSSGStageGeneratorBase &fragmentShader,
 {
     if (inShadowEnabled) {
         vertexShader.generateWorldPosition(inKey);
-        const auto& names = setupShadowMapVariableNames(lightIdx, shadowMapRes);
+        const auto& names = setupShadowMapVariableNames(lightIdx, shadowMapRes, is32bit);
         fragmentShader.addInclude("shadowMapping.glsllib");
 
         QByteArray sampleFunctionSuffix;
@@ -835,7 +836,7 @@ static void generateMainLightCalculation(QSSGStageGeneratorBase &fragmentShader,
 
         lightVarPrefix.append("_");
 
-        generateShadowMapOcclusion(fragmentShader, vertexShader, lightIdx, lightNode->m_shadowMapRes, lightNode->m_softShadowQuality, castsShadow, lightNode->type, lightVarNames, inKey);
+        generateShadowMapOcclusion(fragmentShader, vertexShader, lightIdx, lightNode->m_shadowMapRes, lightNode->m_use32BitShadowmap, lightNode->m_softShadowQuality, castsShadow, lightNode->type, lightVarNames, inKey);
 
         generateTempLightColor(fragmentShader, lightVarNames, materialAdapter);
 
@@ -2312,7 +2313,8 @@ void QSSGMaterialShaderGenerator::setRhiMaterialProperties(const QSSGRenderConte
             QSSGShadowMapEntry *pEntry = inRenderProperties.getShadowMapManager()->shadowMapEntry(lightIdx);
             Q_ASSERT(pEntry);
 
-            const auto& names = setupShadowMapVariableNames(lightIdx, theLight->m_shadowMapRes);
+            const bool is32bit = theLight->m_use32BitShadowmap;
+            const auto& names = setupShadowMapVariableNames(lightIdx, theLight->m_shadowMapRes, is32bit);
 
             QSSGShaderShadowData &shadowData(shadowsUniformData.shadowData[lightIdx]);
 

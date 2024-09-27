@@ -119,6 +119,10 @@ void tst_QQuick3DSpotLight::testProperties()
     light.setCastsShadow(false);
     node = static_cast<QSSGRenderLight *>(light.updateSpatialNode(node));
     QVERIFY(!node->m_castShadow);
+    QVERIFY(!node->m_use32BitShadowmap);
+    light.setUse32BitShadowmap(true);
+    node = static_cast<QSSGRenderLight *>(light.updateSpatialNode(node));
+    QVERIFY(node->m_use32BitShadowmap);
 
     float coneAngle = 60.0f;
     float innerConeAngle = 20.0f;

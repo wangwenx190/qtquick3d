@@ -67,6 +67,7 @@ struct Q_QUICK3DRUNTIMERENDER_EXPORT QSSGRenderLight : public QSSGRenderNode
     SoftShadowQuality m_softShadowQuality = SoftShadowQuality::PCF4;
 
     float m_pcfFactor = 2.0f;
+    bool m_use32BitShadowmap = false;
 
     bool m_bakingEnabled;
     bool m_fullyBaked; // direct+indirect
