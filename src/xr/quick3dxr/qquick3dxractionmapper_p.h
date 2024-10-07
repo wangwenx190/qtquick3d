@@ -19,6 +19,8 @@
 #include <QQmlEngine>
 #include <QQuick3DObject>
 #include <QMultiHash>
+#include <QPointer>
+#include "qquick3dxrabstracthapticeffect_p.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -132,18 +134,95 @@ private:
     QList<Action> m_actionIds;
 };
 
+class QQuick3DXrHapticFeedback : public QObject, public QQmlParserStatus
+{
+    Q_OBJECT
+    Q_INTERFACES(QQmlParserStatus)
+    QML_NAMED_ELEMENT(XrHapticFeedback)
+    QML_ADDED_IN_VERSION(6, 9)
+
+    Q_PROPERTY(Hand hand READ hand WRITE setHand NOTIFY handChanged FINAL)
+    Q_PROPERTY(AbstractHapticEffect *hapticEffect READ hapticEffect WRITE setHapticEffect NOTIFY hapticEffectChanged FINAL)
+    Q_PROPERTY(bool trigger READ trigger WRITE setTrigger NOTIFY triggerChanged FINAL)
+    Q_PROPERTY(Condition condition READ condition WRITE setCondition NOTIFY conditionChanged FINAL)
+
+public:
+
+    // Same values as XrController and XrHandModel enums
+    enum Hand : quint8 {
+        LeftHand = 0,
+        RightHand,
+        Unknown,
+    };
+    Q_ENUM(Hand)
+
+    enum Condition : quint8 {
+        RisingEdge = 0,
+        TrailingEdge,
+    };
+    Q_ENUM(Condition)
+
+    explicit QQuick3DXrHapticFeedback(QObject *parent = nullptr);
+    ~QQuick3DXrHapticFeedback() override;
+
+    void classBegin() override;
+    void componentComplete() override;
+
+    AbstractHapticEffect *hapticEffect() const;
+    void setHapticEffect(AbstractHapticEffect *newHapticEffect);
+
+    Hand hand() const;
+    void setHand(Hand newHand);
+
+    bool trigger();
+    void setTrigger(bool newTrigger);
+
+    enum Condition condition()  const;
+    void setCondition(enum Condition newCondition);
+
+signals:
+    void handChanged();
+    void hapticEffectChanged();
+    void triggerChanged();
+    void conditionChanged();
+    void triggeredHaptics();
+
+public Q_SLOTS:
+    void start();
+    void stop();
+
+private:
+    QMetaObject::Connection m_triggerConnection;
+    Hand m_hand;
+    Condition m_condition = RisingEdge;
+    QPointer<AbstractHapticEffect> m_hapticEffect;
+    bool m_trigger = false;
+    bool m_componentComplete = false;
+    void setTriggerConnection();
+
+};
+
 class QQuick3DXrActionMapper : public QObject
 {
     Q_OBJECT
 public:
     static QQuick3DXrActionMapper *instance();
 
+    static QList<QPointer<QQuick3DXrHapticFeedback>> getHapticEffects(QQuick3DXrInputAction::Hand hand);
+
     static void handleInput(QQuick3DXrInputAction::Action id, QQuick3DXrInputAction::Hand hand, const char *shortName, float value);
     static void registerAction(QQuick3DXrInputAction *action);
+    static void registerHapticEffect(QPointer<QQuick3DXrHapticFeedback>);
     static void removeAction(QQuick3DXrInputAction *action);
+    static void removeHapticEffect(QQuick3DXrHapticFeedback *action);
 
 private:
     explicit QQuick3DXrActionMapper(QObject *parent = nullptr);
+
+    struct HapticData
+    {
+        QList<QPointer<QQuick3DXrHapticFeedback>> m_hapticEffects;
+    } m_hapticData[2];
 
     QMultiHash<quint32, QQuick3DXrInputAction *> m_actions;
     QMultiHash<QString, QQuick3DXrInputAction *> m_customActions;

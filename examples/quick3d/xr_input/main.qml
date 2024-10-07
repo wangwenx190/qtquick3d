@@ -35,6 +35,17 @@ XrView {
         eulerRotation.y: -70
     }
 
+    XrHapticFeedback {
+        hand: XrHapticFeedback.RightHand
+        condition: XrHapticFeedback.RisingEdge
+        trigger: pickRay.hit
+        hapticEffect: XrBasicHapticEffect {
+            amplitude: 0.5
+            duration: 30
+            frequency: 3000
+        }
+    }
+
     XrOrigin {
         id: theOrigin
         z: 100
