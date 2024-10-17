@@ -1401,6 +1401,7 @@ void RenderHelpers::rhiRenderShadowMap(QSSGRhiContext *rhiCtx,
 
     QSSGDebugDrawSystem *debugDrawSystem = renderer.contextInterface()->debugDrawSystem().get();
     const bool drawDirectionalLightShadowBoxes = layerData.layer.drawDirectionalLightShadowBoxes;
+    const bool drawPointLightShadowBoxes = layerData.layer.drawPointLightShadowBoxes;
     const bool drawShadowCastingBounds = layerData.layer.drawShadowCastingBounds;
     const bool drawShadowReceivingBounds = layerData.layer.drawShadowReceivingBounds;
     const bool drawCascades = layerData.layer.drawCascades;
@@ -1577,6 +1578,10 @@ void RenderHelpers::rhiRenderShadowMap(QSSGRhiContext *rhiCtx,
                 cb->endPass();
                 QSSGRHICTX_STAT(rhiCtx, endRenderPass());
                 Q_QUICK3D_PROFILE_END_WITH_STRING(QQuick3DProfiler::Quick3DRenderPass, 0, QSSG_RENDERPASS_NAME("shadow_cube", 0, outFace));
+            }
+
+            if (drawPointLightShadowBoxes) {
+                ShadowmapHelpers::addPointLightDebugBox(light->getGlobalPos(), shadowMapFar, debugDrawSystem);
             }
         }
     }

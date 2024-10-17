@@ -223,6 +223,7 @@ struct Q_QUICK3DRUNTIMERENDER_EXPORT QSSGRenderLayer : public QSSGRenderNode
 
     bool wireframeMode = false;
     bool drawDirectionalLightShadowBoxes = false;
+    bool drawPointLightShadowBoxes = false;
     bool drawShadowCastingBounds = false;
     bool drawShadowReceivingBounds = false;
     bool drawCascades = false;
