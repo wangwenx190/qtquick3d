@@ -45,7 +45,8 @@ void QQuick3DXrActionMapper::handleInput(QQuick3DXrInputAction::Action id, QQuic
     }
 
     for (const auto &action : std::as_const(actions))
-        set(action, value);
+        if (action->enabled())
+            set(action, value);
 }
 
 // Note: it is the responsibility of the caller to call removeAction() before the action is destroyed or actionId/actionName is changed
@@ -274,6 +275,27 @@ void QQuick3DXrInputAction::setHand(Hand newHand)
         return;
     m_hand = newHand;
     emit handChanged();
+}
+
+/*!
+    \qmlproperty bool XrInputAction::enabled
+    \since 6.9
+
+    This property determines whether the input action will react to events.
+    \default true
+*/
+
+bool QQuick3DXrInputAction::enabled() const
+{
+    return m_enabled;
+}
+
+void QQuick3DXrInputAction::setEnabled(bool newEnabled)
+{
+    if (m_enabled == newEnabled)
+        return;
+    m_enabled = newEnabled;
+    emit enabledChanged();
 }
 
 QT_END_NAMESPACE

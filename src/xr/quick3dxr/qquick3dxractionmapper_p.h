@@ -37,6 +37,7 @@ class QQuick3DXrInputAction : public QObject, public QQmlParserStatus
     Q_PROPERTY(bool pressed READ pressed NOTIFY pressedChanged FINAL)
     Q_PROPERTY(QString actionName READ actionName WRITE setActionName NOTIFY actionNameChanged FINAL)
     Q_PROPERTY(QList<Action> actionId READ actionId WRITE setActionId NOTIFY actionIdChanged FINAL)
+    Q_PROPERTY(bool enabled READ enabled WRITE setEnabled NOTIFY enabledChanged FINAL REVISION(6, 9))
 
     Q_PROPERTY(Hand hand READ hand WRITE setHand NOTIFY handChanged FINAL)
 
@@ -105,6 +106,9 @@ public:
     Hand hand() const;
     void setHand(Hand newHand);
 
+    bool enabled() const;
+    void setEnabled(bool newEnabled);
+
 signals:
     void valueChanged();
     void pressedChanged();
@@ -115,11 +119,14 @@ signals:
 
     void handChanged();
 
+    void enabledChanged();
+
 private:
     QString m_actionName;
     float m_value = 0;
     bool m_pressed = false;
     bool m_componentComplete = false;
+    bool m_enabled = true;
     Hand m_hand;
 
     QList<Action> m_actionIds;
