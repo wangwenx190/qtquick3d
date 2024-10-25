@@ -22,3 +22,4 @@ lighting/Box.qml
 
 # Misc
 view3d/SharedResources2.qml
+view3d/MultipleViews_Item2D.qml
