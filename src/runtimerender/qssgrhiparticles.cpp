@@ -412,9 +412,9 @@ void QSSGParticleRenderer::rhiPrepareRenderable(QSSGRhiShaderPipeline &shaderPip
     ps->viewCount = viewCount;
     ps->cullMode = QRhiGraphicsPipeline::None;
     if (renderable.renderableFlags.hasTransparency())
-        fillTargetBlend(ps->targetBlend, renderable.particles.m_blendMode);
+        fillTargetBlend(ps->targetBlend[0], renderable.particles.m_blendMode);
     else
-        ps->targetBlend = QRhiGraphicsPipeline::TargetBlend();
+        ps->targetBlend[0] = QRhiGraphicsPipeline::TargetBlend();
 
     QSSGRhiShaderResourceBindingList bindings;
     bindings.addUniformBuffer(0, VISIBILITY_ALL, dcd.ubuf, 0, shaderPipeline.ub0Size());

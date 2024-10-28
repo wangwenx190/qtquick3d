@@ -1045,7 +1045,7 @@ void RenderHelpers::rhiPrepareRenderable(QSSGRhiContext *rhiCtx,
 
             const auto &material = static_cast<const QSSGRenderDefaultMaterial &>(subsetRenderable.getMaterial());
             ps->cullMode = QSSGRhiHelpers::toCullMode(material.cullMode);
-            fillTargetBlend(&ps->targetBlend, material.blendMode);
+            fillTargetBlend(&ps->targetBlend[0], material.blendMode);
 
             auto &ia = QSSGRhiInputAssemblerStatePrivate::get(*ps);
 
@@ -2291,7 +2291,7 @@ bool RenderHelpers::rhiPrepareDepthPass(QSSGRhiContext *rhiCtx,
     ps.samples = samples;
     ps.viewCount = viewCount;
     ps.flags |= { QSSGRhiGraphicsPipelineState::Flag::DepthTestEnabled, QSSGRhiGraphicsPipelineState::Flag::DepthWriteEnabled };
-    ps.targetBlend.colorWrite = {};
+    ps.targetBlend[0].colorWrite = {};
 
     for (const QSSGRenderableObjectHandle &handle : sortedOpaqueObjects) {
         if (!rhiPrepareDepthPassForObject(rhiCtx, passKey, inData, handle.obj, rpDesc, &ps))

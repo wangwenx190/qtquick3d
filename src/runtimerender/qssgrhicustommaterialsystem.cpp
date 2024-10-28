@@ -257,7 +257,7 @@ void QSSGCustomMaterialSystem::rhiPrepareRenderable(QSSGRhiGraphicsPipelineState
 
         ps->cullMode = QSSGRhiHelpers::toCullMode(cullMode);
 
-        ps->targetBlend = blend;
+        ps->targetBlend[0] = blend;
 
         auto &ia = QSSGRhiInputAssemblerStatePrivate::get(*ps);
 

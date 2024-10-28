@@ -1656,11 +1656,12 @@ QRhiGraphicsPipeline *QSSGRhiContextPrivate::pipeline(const QSSGGraphicsPipeline
     if (ia.topology == QRhiGraphicsPipeline::Lines || ia.topology == QRhiGraphicsPipeline::LineStrip)
         ps->setLineWidth(key.state.lineWidth);
 
-    QRhiGraphicsPipeline::TargetBlend blend = key.state.targetBlend;
-    blend.enable = (key.state.flags.testFlag(QSSGRhiGraphicsPipelineState::Flag::BlendEnabled));
+    const bool blendEnabled = key.state.flags.testFlag(QSSGRhiGraphicsPipelineState::Flag::BlendEnabled);
     QVarLengthArray<QRhiGraphicsPipeline::TargetBlend, 8> targetBlends(key.state.colorAttachmentCount);
-    for (int i = 0; i < key.state.colorAttachmentCount; ++i)
-        targetBlends[i] = blend;
+    for (int i = 0; i < key.state.colorAttachmentCount; ++i) {
+        targetBlends[i] =  key.state.targetBlend[i];
+        targetBlends[i].enable = blendEnabled;
+    }
     ps->setTargetBlends(targetBlends.cbegin(), targetBlends.cend());
 
     ps->setSampleCount(key.state.samples);
