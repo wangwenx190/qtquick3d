@@ -215,4 +215,9 @@ QSSGRhiShaderPipelinePtr QSSGBuiltInRhiShaderCache::getRhiEnvironmentmapShader()
     return getBuiltinRhiShader(QByteArrayLiteral("environmentmap"), m_cache.environmentmapShader);
 }
 
+QSSGRhiShaderPipelinePtr QSSGBuiltInRhiShaderCache::getRhiClearMRTShader()
+{
+    return getBuiltinRhiShader(QByteArrayLiteral("clear_mrt"), m_cache.clearMRTShader);
+}
+
 QT_END_NAMESPACE

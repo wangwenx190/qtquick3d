@@ -250,6 +250,21 @@ qt_internal_add_shaders(Quick3DRuntimeRender "res_shaders_es3_pertarget"
         res/rhishaders/lightmapdilate.vert
         res/rhishaders/lightmapdilate.frag
 )
+qt_internal_add_shaders(Quick3DRuntimeRender "res_shaders_clear_mrt"
+    SILENT
+    PRECOMPILE
+    OPTIMIZED
+    MULTIVIEW
+    GLSL "300es,150"
+    PREFIX
+        "/"
+    FILES
+        res/rhishaders/clearmrt.vert
+        res/rhishaders/clearmrt.frag
+    OUTPUTS
+        res/rhishaders/clear_mrt.vert.qsb
+        res/rhishaders/clear_mrt.frag.qsb
+)
 qt_internal_add_shaders(Quick3DRuntimeRender "res_shaders_es3_gl3"
     SILENT
     PRECOMPILE

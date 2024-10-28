@@ -59,6 +59,7 @@ public:
     QSSGRhiShaderPipelinePtr getRhiReflectionprobePreFilterShader();
     QSSGRhiShaderPipelinePtr getRhienvironmentmapPreFilterShader(bool isRGBE);
     QSSGRhiShaderPipelinePtr getRhiEnvironmentmapShader();
+    QSSGRhiShaderPipelinePtr getRhiClearMRTShader();
 
 private:
     QSSGShaderCache &m_shaderCache; // We're owned by the shadercache
@@ -73,7 +74,6 @@ private:
     QSSGRhiShaderPipelinePtr getBuiltinRhiShader(const QByteArray &name,
                                                 BuiltinShader &storage,
                                                 int viewCount = 1);
-
     struct {
         BuiltinShader cubemapShadowBlurXRhiShader;
         BuiltinShader cubemapShadowBlurYRhiShader;
@@ -109,6 +109,7 @@ private:
         BuiltinShader lineParticlesVLightRhiShader;
         BuiltinShader lineParticlesMappedVLightRhiShader;
         BuiltinShader lineParticlesAnimatedVLightRhiShader;
+        BuiltinShader clearMRTShader;
     } m_cache;
 };
 
