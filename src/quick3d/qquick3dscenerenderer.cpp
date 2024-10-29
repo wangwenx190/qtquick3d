@@ -1297,6 +1297,9 @@ void QQuick3DRenderLayerHelpers::updateLayerNodeHelper(const QQuick3DViewport &v
     } else {
         layerNode.fog.enabled = false;
     }
+    const auto method = static_cast<QSSGRenderLayer::OITMethod>(environment->oitMethod());
+    layerNode.oitMethodDirty = method != layerNode.oitMethod;
+    layerNode.oitMethod = method;
 }
 
 void QQuick3DSceneRenderer::updateLayerNode(QQuick3DViewport *view3D, const QList<QSSGRenderGraphObject *> &resourceLoaders)

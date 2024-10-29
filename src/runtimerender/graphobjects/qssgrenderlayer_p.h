@@ -167,6 +167,7 @@ struct Q_QUICK3DRUNTIMERENDER_EXPORT QSSGRenderLayer : public QSSGRenderNode
     float ssaaMultiplier;
     bool specularAAEnabled;
     OITMethod oitMethod;
+    bool oitMethodDirty;
 
     //TODO: move render state somewhere more suitable
     bool temporalAAIsActive;

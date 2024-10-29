@@ -1278,6 +1278,8 @@ QSSGDefaultMaterialPreparationResult QSSGLayerRenderData::prepareDefaultMaterial
     if (renderableFlags.hasTransparency()) {
         if (orderIndependentTransparencyEnabled)
             defaultMaterialShaderKeyProperties.m_orderIndependentTransparency.setValue(theGeneratedKey, int(layer.oitMethod));
+        if (layer.oitMethodDirty)
+            renderableFlags |= QSSGRenderableObjectFlag::Dirty;
     }
 
     retval.firstImage = firstImage;
@@ -2240,6 +2242,11 @@ void QSSGLayerRenderData::prepareForRender()
     orderIndependentTransparencyEnabled = (layer.oitMethod != QSSGRenderLayer::OITMethod::None);
     if (layer.oitMethod == QSSGRenderLayer::OITMethod::WeightedBlended)
         orderIndependentTransparencyEnabled = rhiCtx->rhi()->isFeatureSupported(QRhi::PerRenderTargetBlending);
+    if (layer.oitMethodDirty) {
+        oitRenderContext.reset();
+        for (auto &renderResult : renderResults)
+            renderResult.reset();
+    }
 
     layerPrepResult.flags.setRequiresDepthTexture(requiresDepthTexture);
 
@@ -2533,6 +2540,7 @@ void QSSGLayerRenderData::prepareForRender()
             orderIndependentTransparencyEnabled = false;
         }
     }
+    layer.oitMethodDirty = false;
 
     prepareReflectionProbesForRender();
 
