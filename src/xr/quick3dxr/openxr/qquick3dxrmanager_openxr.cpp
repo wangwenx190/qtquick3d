@@ -49,6 +49,10 @@
 # endif // XR_USE_GRAPHICS_API_OPENGL_ES
 #endif // XR_USE_PLATFORM_ANDROID
 
+#ifdef XR_USE_GRAPHICS_API_METAL
+# include "qopenxrgraphics_metal_p.h"
+#endif // XR_USE_GRAPHICS_API_METAL
+
 static XrReferenceSpaceType getXrReferenceSpaceType(QtQuick3DXr::ReferenceSpace referenceSpace)
 {
     switch (referenceSpace) {
@@ -453,6 +457,10 @@ bool QQuick3DXrManagerPrivate::initialize()
 #ifdef XR_USE_GRAPHICS_API_OPENGL_ES
     if (graphicsAPI == QSGRendererInterface::OpenGL)
         m_graphics = new QOpenXRGraphicsOpenGLES;
+#endif
+#ifdef XR_USE_GRAPHICS_API_METAL
+    if (graphicsAPI == QSGRendererInterface::Metal)
+        m_graphics = new QOpenXRGraphicsMetal;
 #endif
 
     if (!m_graphics) {
