@@ -235,11 +235,14 @@ QSSGRhiShaderPipelinePtr QSSGBuiltInRhiShaderCache::getRhiClearMRTShader()
     return getBuiltinRhiShader(QByteArrayLiteral("clear_mrt"), m_cache.clearMRTShader);
 }
 
-QSSGRhiShaderPipelinePtr QSSGBuiltInRhiShaderCache::getRhiOitCompositeShader(QSSGRenderLayer::OITMethod method)
+QSSGRhiShaderPipelinePtr QSSGBuiltInRhiShaderCache::getRhiOitCompositeShader(QSSGRenderLayer::OITMethod method, bool multisample)
 {
-    if (method == QSSGRenderLayer::OITMethod::WeightedBlended)
-        return getBuiltinRhiShader(QByteArrayLiteral("oitcomposite_weightedblended"), m_cache.oitCompositeShader[0]);
-
+    if (method == QSSGRenderLayer::OITMethod::WeightedBlended){
+        if (multisample)
+            return getBuiltinRhiShader(QByteArrayLiteral("oitcomposite_weightedblended_ms"), m_cache.oitCompositeShader[1]);
+        else
+            return getBuiltinRhiShader(QByteArrayLiteral("oitcomposite_weightedblended"), m_cache.oitCompositeShader[0]);
+    }
     Q_UNREACHABLE_RETURN(getBuiltinRhiShader(QByteArrayLiteral("oitcomposite_weightedblended"), m_cache.oitCompositeShader[0]));
 }
 

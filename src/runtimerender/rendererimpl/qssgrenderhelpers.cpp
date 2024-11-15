@@ -2379,7 +2379,7 @@ void RenderHelpers::rhiRenderDepthPass(QSSGRhiContext *rhiCtx,
     rhiRenderDepthPassForImp(rhiCtx, pipelineState, sortedTransparentObjects, needsSetViewport);
 }
 
-bool RenderHelpers::rhiPrepareDepthTexture(QSSGRhiContext *rhiCtx, const QSize &size, QSSGRhiRenderableTexture *renderableTex)
+bool RenderHelpers::rhiPrepareDepthTexture(QSSGRhiContext *rhiCtx, const QSize &size, QSSGRhiRenderableTexture *renderableTex, int samples)
 {
     QRhi *rhi = rhiCtx->rhi();
     bool needsBuild = false;
@@ -2390,9 +2390,8 @@ bool RenderHelpers::rhiPrepareDepthTexture(QSSGRhiContext *rhiCtx, const QSize &
             format = QRhiTexture::D16;
         if (!rhi->isTextureFormatSupported(format))
             qWarning("Depth texture not supported");
-        // the depth texture is always non-msaa, even if multisampling is used in the main pass
         if (rhiCtx->mainPassViewCount() <= 1)
-            renderableTex->texture = rhiCtx->rhi()->newTexture(format, size, 1, QRhiTexture::RenderTarget);
+            renderableTex->texture = rhiCtx->rhi()->newTexture(format, size, samples, QRhiTexture::RenderTarget);
         else
             renderableTex->texture = rhiCtx->rhi()->newTextureArray(format, rhiCtx->mainPassViewCount(), size, 1, QRhiTexture::RenderTarget);
         needsBuild = true;

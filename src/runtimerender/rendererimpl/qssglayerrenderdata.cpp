@@ -2240,8 +2240,11 @@ void QSSGLayerRenderData::prepareForRender()
 
     const auto &rhiCtx = renderer->contextInterface()->rhiContext();
     orderIndependentTransparencyEnabled = (layer.oitMethod != QSSGRenderLayer::OITMethod::None);
-    if (layer.oitMethod == QSSGRenderLayer::OITMethod::WeightedBlended)
+    if (layer.oitMethod == QSSGRenderLayer::OITMethod::WeightedBlended) {
         orderIndependentTransparencyEnabled = rhiCtx->rhi()->isFeatureSupported(QRhi::PerRenderTargetBlending);
+        if (rhiCtx->mainPassSampleCount() > 1)
+            orderIndependentTransparencyEnabled |= rhiCtx->rhi()->isFeatureSupported(QRhi::TexelFetch);
+    }
     if (layer.oitMethodDirty) {
         oitRenderContext.reset();
         for (auto &renderResult : renderResults)
@@ -2534,8 +2537,12 @@ void QSSGLayerRenderData::prepareForRender()
     if (orderIndependentTransparencyEnabled) {
         // OIT blending mode must be SourceOver and have transparent objects
         if (transparentObjects.size() > 0 && !layerPrepResult.flags.hasCustomBlendMode()) {
-            if (layer.oitMethod == QSSGRenderLayer::OITMethod::WeightedBlended)
-                layerPrepResult.flags.setRequiresDepthTexture(true);
+            if (layer.oitMethod == QSSGRenderLayer::OITMethod::WeightedBlended) {
+                if (rhiCtx->mainPassSampleCount() > 1)
+                    layerPrepResult.flags.setRequiresDepthTextureMS(true);
+                else
+                    layerPrepResult.flags.setRequiresDepthTexture(true);
+            }
         } else {
             orderIndependentTransparencyEnabled = false;
         }
@@ -2608,6 +2615,8 @@ void QSSGLayerRenderData::prepareForRender()
     // expose these textures to their shaders.
     if (layerPrepResult.flags.requiresDepthTexture())
         activePasses.push_back(&depthMapPass);
+    if (layerPrepResult.flags.requiresDepthTextureMS())
+        activePasses.push_back(&depthMapPassMS);
 
     // Screen space ambient occlusion. Relies on the depth texture and generates an AO map.
     if (layerPrepResult.flags.requiresSsaoPass())
@@ -2756,6 +2765,7 @@ QSSGLayerRenderData::QSSGLayerRenderData(QSSGRenderLayer &inLayer, QSSGRenderer 
     , orderIndependentTransparencyEnabled(false)
     , particlesEnabled(checkParticleSupport(inRenderer.contextInterface()->rhi()))
 {
+    depthMapPassMS.setMultisamplingEnabled(true);
 }
 
 QSSGLayerRenderData::~QSSGLayerRenderData()

@@ -70,7 +70,10 @@ enum class QSSGLayerRenderPreparationResultFlag
     RequiresMipmapsForScreenTexture = 1 << 6,
 
     // Set when material has custom blend mode(not SourceOver)
-    MaterialHasCustomBlendMode = 1 << 7
+    MaterialHasCustomBlendMode = 1 << 7,
+
+    // Set when multisampled depth texture is required
+    RequiresDepthTextureMS = 1 << 8
 };
 
 struct QSSGLayerRenderPreparationResultFlags : public QFlags<QSSGLayerRenderPreparationResultFlag>
@@ -94,6 +97,15 @@ struct QSSGLayerRenderPreparationResultFlags : public QFlags<QSSGLayerRenderPrep
     void setRequiresDepthTexture(bool inValue)
     {
         setFlag(QSSGLayerRenderPreparationResultFlag::RequiresDepthTexture, inValue);
+    }
+
+    bool requiresDepthTextureMS() const
+    {
+        return this->operator&(QSSGLayerRenderPreparationResultFlag::RequiresDepthTextureMS);
+    }
+    void setRequiresDepthTextureMS(bool inValue)
+    {
+        setFlag(QSSGLayerRenderPreparationResultFlag::RequiresDepthTextureMS, inValue);
     }
 
     bool requiresSsaoPass() const { return this->operator&(QSSGLayerRenderPreparationResultFlag::RequiresSsaoPass); }
@@ -270,6 +282,7 @@ public:
     ZPrePassPass zPrePassPass;
     SSAOMapPass ssaoMapPass;
     DepthMapPass depthMapPass;
+    DepthMapPass depthMapPassMS;
     ScreenMapPass screenMapPass;
     ScreenReflectionPass reflectionPass;
     Item2DPass item2DPass;
@@ -510,7 +523,7 @@ private:
     QSSGRenderReflectionMapPtr reflectionMapManager;
     QHash<const QSSGModelContext *, QRhiTexture *> lightmapTextures;
     QHash<const QSSGModelContext *, QRhiTexture *> bonemapTextures;
-    QSSGRhiRenderableTexture renderResults[5] {};
+    QSSGRhiRenderableTexture renderResults[6] {};
     QSSGOITRenderContext oitRenderContext;
 };
 

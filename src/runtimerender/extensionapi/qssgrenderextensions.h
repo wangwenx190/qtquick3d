@@ -33,6 +33,7 @@ public:
     {
         AoTexture,
         DepthTexture,
+        DepthTextureMS,
         ScreenTexture,
         AccumTexture,
         RevealageTexture

@@ -60,7 +60,7 @@ public:
     QSSGRhiShaderPipelinePtr getRhienvironmentmapPreFilterShader(bool isRGBE);
     QSSGRhiShaderPipelinePtr getRhiEnvironmentmapShader();
     QSSGRhiShaderPipelinePtr getRhiClearMRTShader();
-    QSSGRhiShaderPipelinePtr getRhiOitCompositeShader(QSSGRenderLayer::OITMethod method);
+    QSSGRhiShaderPipelinePtr getRhiOitCompositeShader(QSSGRenderLayer::OITMethod method, bool multisample);
 
 private:
     QSSGShaderCache &m_shaderCache; // We're owned by the shadercache
@@ -76,7 +76,7 @@ private:
                                                 BuiltinShader &storage,
                                                 int viewCount = 1);
     static constexpr int particleShaderCount = 2;
-    static constexpr int compositeShaderCount = 1;
+    static constexpr int compositeShaderCount = 2;
     struct {
         BuiltinShader cubemapShadowBlurXRhiShader;
         BuiltinShader cubemapShadowBlurYRhiShader;

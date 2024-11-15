@@ -13,8 +13,13 @@ layout(location = 0) in vec2 uv_coord;
 
 #if QSSG_OIT_METHOD == QSSG_OIT_WEIGHTED_BLENDED
 
+#ifdef QSSG_MULTISAMPLE
+layout(binding = 1) uniform sampler2DMS accumTexture;
+layout(binding = 2) uniform sampler2DMS revealageTexture;
+#else
 layout(binding = 1) uniform sampler2D accumTexture;
 layout(binding = 2) uniform sampler2D revealageTexture;
+#endif
 
 void main()
 {
@@ -24,8 +29,14 @@ void main()
 #else
     vec2 uv = uv_coord;
 #endif
+#ifdef QSSG_MULTISAMPLE
+    ivec2 iuv = ivec2(uv * textureSize(accumTexture));
+    vec4 accum = texelFetch(accumTexture, iuv, gl_SampleID);
+    float a = 1.0 - texelFetch(revealageTexture, iuv, gl_SampleID).r;
+#else
     vec4 accum = texture(accumTexture, uv);
     float a = 1.0 - texture(revealageTexture, uv).r;
+#endif
     vec4 color = vec4(accum.rgb / clamp(accum.a, 1e-4, 5e6), a);
     fragOutput = vec4(color);
 }

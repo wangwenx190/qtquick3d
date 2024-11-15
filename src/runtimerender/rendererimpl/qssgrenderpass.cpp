@@ -374,14 +374,22 @@ void DepthMapPass::renderPrep(QSSGRenderer &renderer, QSSGLayerRenderData &data)
     const auto &layerPrepResult = data.layerPrepResult;
     bool ready = false;
     ps = data.getPipelineState();
-    rhiDepthTexture = data.getRenderResult(QSSGFrameData::RenderResult::DepthTexture);
-    if (Q_LIKELY(rhiDepthTexture && rhiPrepareDepthTexture(rhiCtx.get(), layerPrepResult.textureDimensions(), rhiDepthTexture))) {
+
+    if (m_multisampling) {
+        ps.samples = rhiCtx->mainPassSampleCount();
+        rhiDepthTexture = data.getRenderResult(QSSGFrameData::RenderResult::DepthTextureMS);
+    } else {
+        ps.samples = 1;
+        rhiDepthTexture = data.getRenderResult(QSSGFrameData::RenderResult::DepthTexture);
+    }
+
+    if (Q_LIKELY(rhiDepthTexture && rhiPrepareDepthTexture(rhiCtx.get(), layerPrepResult.textureDimensions(), rhiDepthTexture, ps.samples))) {
         sortedOpaqueObjects = data.getSortedOpaqueRenderableObjects(*camera);
         sortedTransparentObjects = data.getSortedTransparentRenderableObjects(*camera);
         // the depth texture is always non-MSAA, but is a 2D array with multiview
         ready = rhiPrepareDepthPass(rhiCtx.get(), this, ps, rhiDepthTexture->rpDesc, data,
                                     sortedOpaqueObjects, sortedTransparentObjects,
-                                    1, rhiCtx->mainPassViewCount());
+                                    ps.samples, rhiCtx->mainPassViewCount());
     }
 
     if (Q_UNLIKELY(!ready))
@@ -1177,12 +1185,16 @@ void OITRenderPass::renderPrep(QSSGRenderer &renderer, QSSGLayerRenderData &data
 
         rhiAccumTexture = data.getRenderResult(QSSGFrameData::RenderResult::AccumTexture);
         rhiRevealageTexture = data.getRenderResult(QSSGFrameData::RenderResult::RevealageTexture);
-        rhiDepthTexture = data.getRenderResult(QSSGFrameData::RenderResult::DepthTexture);
+        if (ps.samples > 1)
+            rhiDepthTexture = data.getRenderResult(QSSGFrameData::RenderResult::DepthTextureMS);
+        else
+            rhiDepthTexture = data.getRenderResult(QSSGFrameData::RenderResult::DepthTexture);
         if (!rhiDepthTexture->isValid())
             return;
         auto &oitrt = data.getOitRenderContext();
         if (!oitrt.oitRenderTarget || oitrt.oitRenderTarget->pixelSize() != data.layerPrepResult.textureDimensions()
-            || rhiDepthTexture->texture != oitrt.oitRenderTarget->description().depthTexture()) {
+            || rhiDepthTexture->texture != oitrt.oitRenderTarget->description().depthTexture()
+            || ps.samples != oitrt.oitRenderTarget->sampleCount()) {
             if (oitrt.oitRenderTarget) {
                 rhiAccumTexture->texture->destroy();
                 rhiRevealageTexture->texture->destroy();
@@ -1191,9 +1203,9 @@ void OITRenderPass::renderPrep(QSSGRenderer &renderer, QSSGLayerRenderData &data
                 oitrt.oitRenderTarget = nullptr;
             }
             const QRhiTexture::Flags textureFlags = QRhiTexture::RenderTarget;
-            rhiAccumTexture->texture = rhi->newTexture(QRhiTexture::RGBA16F, data.layerPrepResult.textureDimensions(), 1, textureFlags);
+            rhiAccumTexture->texture = rhi->newTexture(QRhiTexture::RGBA16F, data.layerPrepResult.textureDimensions(), ps.samples, textureFlags);
             rhiAccumTexture->texture->create();
-            rhiRevealageTexture->texture = rhi->newTexture(QRhiTexture::R16F, data.layerPrepResult.textureDimensions(), 1, textureFlags);
+            rhiRevealageTexture->texture = rhi->newTexture(QRhiTexture::R16F, data.layerPrepResult.textureDimensions(), ps.samples, textureFlags);
             rhiRevealageTexture->texture->create();
 
             QRhiTextureRenderTargetDescription desc;
@@ -1308,15 +1320,15 @@ void OITCompositePass::renderPrep(QSSGRenderer &renderer, QSSGLayerRenderData &d
     QSSG_ASSERT(rhiCtx->rhi()->isRecordingFrame(), return);
     const auto &shaderCache = renderer.contextInterface()->shaderCache();
 
+    ps = data.getPipelineState();
+    ps.samples = rhiCtx->mainPassSampleCount();
+    ps.viewCount = rhiCtx->mainPassViewCount();
+
     if (method == QSSGRenderLayer::OITMethod::WeightedBlended) {
         rhiAccumTexture = data.getRenderResult(QSSGFrameData::RenderResult::AccumTexture);
         rhiRevealageTexture = data.getRenderResult(QSSGFrameData::RenderResult::RevealageTexture);
-        compositeShaderPipeline = shaderCache->getBuiltInRhiShaders().getRhiOitCompositeShader(method);
+        compositeShaderPipeline = shaderCache->getBuiltInRhiShaders().getRhiOitCompositeShader(method, ps.samples > 1 ? true : false);
     }
-
-    ps = data.getPipelineState();
-    ps.samples = 1;
-    ps.viewCount = rhiCtx->mainPassViewCount();
 }
 
 void OITCompositePass::renderPass(QSSGRenderer &renderer)

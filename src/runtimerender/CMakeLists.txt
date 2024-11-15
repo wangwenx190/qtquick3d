@@ -658,6 +658,26 @@ qt_internal_add_shaders(Quick3DRuntimeRender "res_shaders_composite_weightedblen
         QSSG_OIT_METHOD=1
 )
 
+qt_internal_add_shaders(Quick3DRuntimeRender "res_shaders_composite_weightedblended_ms"
+    SILENT
+    PRECOMPILE
+    OPTIMIZED
+    MULTIVIEW
+    PERTARGETCOMPILE
+    GLSL "300es,150"
+    PREFIX
+        "/"
+    FILES
+        res/rhishaders/oitcomposite.vert
+        res/rhishaders/oitcomposite.frag
+    OUTPUTS
+        res/rhishaders/oitcomposite_weightedblended_ms.vert.qsb
+        res/rhishaders/oitcomposite_weightedblended_ms.frag.qsb
+    DEFINES
+        QSSG_OIT_METHOD=1
+        QSSG_MULTISAMPLE
+)
+
 # special case end
 
 #### Keys ignored in scope 1:.:.:runtimerender.pro:<TRUE>:

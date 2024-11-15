@@ -126,11 +126,14 @@ public:
     void renderPass(QSSGRenderer &renderer) final;
     Type passType() const final { return Type::Standalone; }
     void resetForFrame() final;
+    void setMultisamplingEnabled(bool enabled) { m_multisampling = enabled; }
+    bool isMultisamplingEnabled() const { return m_multisampling; }
 
     QSSGRenderableObjectList sortedOpaqueObjects;
     QSSGRenderableObjectList sortedTransparentObjects;
     QSSGRhiGraphicsPipelineState ps;
     QSSGRhiRenderableTexture *rhiDepthTexture = nullptr;
+    bool m_multisampling = false;
 };
 
 class SkyboxPass : public QSSGRenderPass
