@@ -1203,9 +1203,14 @@ void OITRenderPass::renderPrep(QSSGRenderer &renderer, QSSGLayerRenderData &data
                 oitrt.oitRenderTarget = nullptr;
             }
             const QRhiTexture::Flags textureFlags = QRhiTexture::RenderTarget;
-            rhiAccumTexture->texture = rhi->newTexture(QRhiTexture::RGBA16F, data.layerPrepResult.textureDimensions(), ps.samples, textureFlags);
+            if (ps.viewCount >= 2) {
+                rhiAccumTexture->texture = rhi->newTextureArray(QRhiTexture::RGBA16F, ps.viewCount, data.layerPrepResult.textureDimensions(), ps.samples, textureFlags);
+                rhiRevealageTexture->texture = rhi->newTextureArray(QRhiTexture::R16F, ps.viewCount, data.layerPrepResult.textureDimensions(), ps.samples, textureFlags);
+            } else {
+                rhiAccumTexture->texture = rhi->newTexture(QRhiTexture::RGBA16F, data.layerPrepResult.textureDimensions(), ps.samples, textureFlags);
+                rhiRevealageTexture->texture = rhi->newTexture(QRhiTexture::R16F, data.layerPrepResult.textureDimensions(), ps.samples, textureFlags);
+            }
             rhiAccumTexture->texture->create();
-            rhiRevealageTexture->texture = rhi->newTexture(QRhiTexture::R16F, data.layerPrepResult.textureDimensions(), ps.samples, textureFlags);
             rhiRevealageTexture->texture->create();
 
             QRhiTextureRenderTargetDescription desc;
