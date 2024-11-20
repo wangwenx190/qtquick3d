@@ -19,6 +19,8 @@ Item {
     property bool panEnabled: true
     property bool automaticClipping: true
 
+    property alias acceptedButtons: dragHandler.acceptedButtons
+
     readonly property bool inputsNeedProcessing: status.useMouse || status.isPanning
 
     implicitWidth: parent.width
@@ -68,6 +70,7 @@ Item {
         id: ctrlDragHandler
         target: null
         enabled: root.mouseEnabled && root.panEnabled
+        acceptedButtons: root.acceptedButtons
         acceptedModifiers: Qt.ControlModifier
         onCentroidChanged: {
             root.panEvent(Qt.vector2d(centroid.position.x, centroid.position.y));

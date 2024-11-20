@@ -303,6 +303,12 @@
     \l{Camera::}{clipNear} and \{Camera::}{clipFar} properties based on the
     \l{Camera}{camera}'s z position. The default value is true.
 */
+/*! \qmlproperty Qt::MouseButtons OrbitCameraController::acceptedButtons
+    \since 6.9
+    \default Qt.LeftButton
+    Specifies the mouse button that controls the camera.
+*/
+
 
 /*!
     \qmltype LodManager
