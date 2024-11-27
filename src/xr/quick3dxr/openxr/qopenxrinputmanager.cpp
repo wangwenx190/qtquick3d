@@ -523,7 +523,7 @@ void QQuick3DXrInputManagerPrivate::pollActions()
         QList<QPointer<QQuick3DXrHapticFeedback>>::iterator hapticFeedback;
         for (hapticFeedback = hapticOutputData.begin(); hapticFeedback != hapticOutputData.end(); hapticFeedback++)
         {
-            if (BasicHapticEffect *hapticEffect = dynamic_cast<BasicHapticEffect *>((*hapticFeedback)->hapticEffect()))
+            if (QQuick3DXrBasicHapticEffect *hapticEffect = dynamic_cast<QQuick3DXrBasicHapticEffect *>((*hapticFeedback)->hapticEffect()))
             {
                 if (hapticEffect->getRunning())
                 {

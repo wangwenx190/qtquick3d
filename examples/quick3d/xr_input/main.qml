@@ -35,6 +35,7 @@ XrView {
         eulerRotation.y: -70
     }
 
+    //! [haptics]
     XrHapticFeedback {
         hand: XrHapticFeedback.RightHand
         condition: XrHapticFeedback.RisingEdge
@@ -45,6 +46,7 @@ XrView {
             frequency: 3000
         }
     }
+    //! [haptics]
 
     XrOrigin {
         id: theOrigin

@@ -20,11 +20,11 @@
 
 QT_BEGIN_NAMESPACE
 
-class AbstractHapticEffect : public QObject
+class QQuick3DXrAbstractHapticEffect : public QObject
 {
     Q_OBJECT
-    QML_NAMED_ELEMENT(XrAbstractHapticEffect)
-    QML_UNCREATABLE("XrAbstractHapticEffect is an abstract base class.")
+    QML_NAMED_ELEMENT(XrHapticEffect)
+    QML_UNCREATABLE("XrHapticEffect is an abstract base class.")
     QML_ADDED_IN_VERSION(6, 9)
 
 public Q_SLOTS:
@@ -32,7 +32,7 @@ public Q_SLOTS:
     virtual void stop();
 };
 
-class BasicHapticEffect : public AbstractHapticEffect
+class QQuick3DXrBasicHapticEffect : public QQuick3DXrAbstractHapticEffect
 {
     Q_OBJECT
     QML_NAMED_ELEMENT(XrBasicHapticEffect)
@@ -61,9 +61,9 @@ public Q_SLOTS:
     void stop() override;
 
 private:
-    float m_amplitude = 0;
-    float m_duration = 0;
-    float m_frequency = 0;
+    float m_amplitude = 0.5;
+    float m_duration = 30;
+    float m_frequency = 3000;
     bool m_running = false;
 };
 

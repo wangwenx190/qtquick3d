@@ -142,7 +142,7 @@ class QQuick3DXrHapticFeedback : public QObject, public QQmlParserStatus
     QML_ADDED_IN_VERSION(6, 9)
 
     Q_PROPERTY(Hand hand READ hand WRITE setHand NOTIFY handChanged FINAL)
-    Q_PROPERTY(AbstractHapticEffect *hapticEffect READ hapticEffect WRITE setHapticEffect NOTIFY hapticEffectChanged FINAL)
+    Q_PROPERTY(QQuick3DXrAbstractHapticEffect *hapticEffect READ hapticEffect WRITE setHapticEffect NOTIFY hapticEffectChanged FINAL)
     Q_PROPERTY(bool trigger READ trigger WRITE setTrigger NOTIFY triggerChanged FINAL)
     Q_PROPERTY(Condition condition READ condition WRITE setCondition NOTIFY conditionChanged FINAL)
 
@@ -168,8 +168,8 @@ public:
     void classBegin() override;
     void componentComplete() override;
 
-    AbstractHapticEffect *hapticEffect() const;
-    void setHapticEffect(AbstractHapticEffect *newHapticEffect);
+    QQuick3DXrAbstractHapticEffect *hapticEffect() const;
+    void setHapticEffect(QQuick3DXrAbstractHapticEffect *newHapticEffect);
 
     Hand hand() const;
     void setHand(Hand newHand);
@@ -195,7 +195,7 @@ private:
     QMetaObject::Connection m_triggerConnection;
     Hand m_hand;
     Condition m_condition = RisingEdge;
-    QPointer<AbstractHapticEffect> m_hapticEffect;
+    QPointer<QQuick3DXrAbstractHapticEffect> m_hapticEffect;
     bool m_trigger = false;
     bool m_componentComplete = false;
     void setTriggerConnection();

@@ -334,15 +334,29 @@ void QQuick3DXrInputAction::setEnabled(bool newEnabled)
 
 /*!
     \qmltype XrHapticFeedback
-    \inherits Item
+    \inherits QtObject
     \inqmlmodule QtQuick3D.Xr
-    \brief Represents a haptic feedback.
+    \brief Controls haptic feedback for an XR controller.
+    \since 6.9
+
+    Haptic feedback typically involves applying a short vibration to a controller to provide a tactile
+    experience when an event happens. This can give the illusion of touching a button, for example.
+
+    There are two ways of using XrHapticFeedback:
+
+    \list
+    \li Imperatively, by calling the \l start function
+    \li Declaratively, by specifying \l trigger and \l condition
+    \endlist
+
+    The following code makes the right-hand controller vibrate when the value of the \c someObject.hit property
+    changes from \c false to \c true:
 
     \qml
     XrHapticFeedback {
         hand: XrHapticFeedback.RightHand
         condition: XrHapticFeedback.RisingEdge
-        trigger: true
+        trigger: someObject.hit
         hapticEffect: XrBasicHapticEffect {
             amplitude: 0.5
             duration: 300
@@ -376,8 +390,6 @@ void QQuick3DXrHapticFeedback::componentComplete()
     \qmlproperty enumeration QtQuick3D.Xr::XrHapticFeedback::hand
     \brief The Hand that this haptic feedback will apply to.
 
-    Specifies the hand to react to.
-
     It can be one of:
 
     \value XrHapticFeedback.LeftHand
@@ -401,6 +413,11 @@ void QQuick3DXrHapticFeedback::setHand(Hand newHand)
 /*!
     \qmlproperty bool XrHapticFeedback::trigger
     \brief Trigger for the haptic feedback
+
+    This property defines what the haptic effect will react to.
+    The \l condition property determines how the trigger is interpreted.
+
+    \sa start condition
  */
 bool QQuick3DXrHapticFeedback::trigger()
 {
@@ -434,16 +451,17 @@ void QQuick3DXrHapticFeedback::setTrigger(bool newTrigger)
 }
 
 /*!
-    \qmlproperty hapticEffect XrHapticFeedback::hapticEffect
-    \brief Haptic effect usedd by the XrHapticFeedback
+    \qmlproperty XrHapticEffect XrHapticFeedback::hapticEffect
+
+    This property describes the effect that is applied to the controller when the haptic feedback is triggered.
  */
 
-AbstractHapticEffect *QQuick3DXrHapticFeedback::hapticEffect() const
+QQuick3DXrAbstractHapticEffect *QQuick3DXrHapticFeedback::hapticEffect() const
 {
     return m_hapticEffect;
 }
 
-void QQuick3DXrHapticFeedback::setHapticEffect(AbstractHapticEffect *newHapticEffect)
+void QQuick3DXrHapticFeedback::setHapticEffect(QQuick3DXrAbstractHapticEffect *newHapticEffect)
 {
     if (m_hapticEffect == newHapticEffect)
         return;
@@ -457,12 +475,12 @@ void QQuick3DXrHapticFeedback::setHapticEffect(AbstractHapticEffect *newHapticEf
     \brief The condition for triggering this haptic feedback.
     \default XrHapticFeedback.RisingEdge
 
-    Specifies the trigger condition.
+    This property specifies how the \l trigger property is interpreted
 
     It can be one of:
 
-    \value XrHapticFeedback.RisingEdge
-    \value XrHapticFeedback.TrailingEdge
+    \value XrHapticFeedback.RisingEdge The haptic effect starts when \l trigger changes from \c false to \c true.
+    \value XrHapticFeedback.TrailingEdge The haptic effect starts when \l trigger changes from \c true to \c false.
  */
 enum QQuick3DXrHapticFeedback::Condition QQuick3DXrHapticFeedback::condition() const
 {
@@ -478,8 +496,8 @@ void QQuick3DXrHapticFeedback::setCondition(enum Condition newCondition)
 }
 
 /*!
-    \qmlproperty void XrHapticFeedback::start
-    \brief Starts the haptic feedback
+    \qmlmethod void XrHapticFeedback::start
+    \brief Starts the haptic feedback effect
  */
 void QQuick3DXrHapticFeedback::start()
 {
@@ -490,8 +508,8 @@ void QQuick3DXrHapticFeedback::start()
 }
 
 /*!
-    \qmlproperty void XrHapticFeedback::stop
-    \brief Stops the haptic feedback
+    \qmlmethod void XrHapticFeedback::stop
+    \brief Stops the haptic feedback effect
  */
 void QQuick3DXrHapticFeedback::stop()
 {

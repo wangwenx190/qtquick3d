@@ -48,6 +48,12 @@
     we made earlier to generate mouse presses/releases and use the thumbstick actions to generate
     mouse wheel events.
 
+    Finally, we add some haptic feedback when the \c pickRay hits an object:
+
+    \snippet xr_input/main.qml haptics
+
+    The haptic effect will trigger each time the \c pickRay.hit property goes from \c false to \c true.
+
     \section1 XrItem
 
     The normal way to \l{Qt Quick 3D Scenes with 2D Content}{embed 2D user interfaces in 3D scenes}
