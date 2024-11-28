@@ -34,8 +34,8 @@ Window {
                 scale: Qt.vector3d(3, 3, 0.1)
                 eulerRotation.x: -90
                 materials: [
-                    DefaultMaterial {
-                        diffuseColor: Qt.rgba(0.8, 0.8, 0.8, 1.0)
+                    PrincipledMaterial {
+                        baseColor: Qt.rgba(0.8, 0.8, 0.8, 1.0)
                     }
                 ]
             }

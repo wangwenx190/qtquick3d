@@ -58,8 +58,8 @@ Window {
             source: "#Cube"
             scale: Qt.vector3d(25, 0.01, 135)
             z: -5500
-            materials: DefaultMaterial {
-                diffuseColor: "gray"
+            materials: PrincipledMaterial {
+                baseColor: "gray"
             }
             castsShadows: false
         }
