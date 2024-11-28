@@ -135,6 +135,7 @@ Q_SIGNALS:
     void multiViewRenderingEnabledChanged();
 
 private:
+    friend class QQuick3DXrViewPrivate;
     // The XrView does not expose the View3D in its public interface. This is intentional.
     QQuick3DViewport *view3d() const;
 
@@ -150,6 +151,13 @@ private:
     struct XrTouchState;
     XrTouchState *m_touchState = nullptr;
     QQuick3DXrOrigin *m_xrOrigin = nullptr;
+};
+
+class Q_QUICK3DXR_EXPORT QQuick3DXrViewPrivate
+{
+    QQuick3DXrViewPrivate() = delete;
+public:
+    [[nodiscard]] static QQuick3DViewport *getView3d(QQuick3DXrView *view);
 };
 
 QT_END_NAMESPACE

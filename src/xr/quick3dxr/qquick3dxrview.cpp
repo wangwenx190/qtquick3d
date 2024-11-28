@@ -8,6 +8,8 @@
 #include <QQuickItem>
 #include <QLoggingCategory>
 
+#include <QtQuick3DUtils/private/qssgassert_p.h>
+
 #include "qquick3dxrinputmanager_p.h"
 
 QT_BEGIN_NAMESPACE
@@ -656,6 +658,12 @@ void QQuick3DXrView::setXROrigin(QQuick3DXrOrigin *newXrOrigin)
     m_xrManager.setXROrigin(m_xrOrigin);
 
     emit xrOriginChanged();
+}
+
+QQuick3DViewport *QQuick3DXrViewPrivate::getView3d(QQuick3DXrView *view)
+{
+    QSSG_ASSERT(view != nullptr, return nullptr);
+    return view->view3d();
 }
 
 /*!

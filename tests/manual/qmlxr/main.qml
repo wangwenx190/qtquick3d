@@ -20,12 +20,14 @@ XrView {
         backgroundMode: SceneEnvironment.Color
     }
 
+    xrOrigin: origin
     XrOrigin {
+        id: origin
         objectName: "xrorigin"
         XrController {
             id: leftController
             controller: XrController.ControllerLeft
-            Component.onCompleted: handInput.poseSpace = XrHandInput.AimPose
+            poseSpace: XrController.AimPose
             Lazer {
                 enableBeam: true
             }
@@ -62,8 +64,7 @@ XrView {
         XrController {
             id: rightController
             controller: XrController.ControllerRight
-            Component.onCompleted: handInput.poseSpace = XrHandInput.AimPose
-            ActionMapper { }
+            poseSpace: XrController.AimPose
             Lazer {
                 enableBeam: true
             }
@@ -74,8 +75,9 @@ XrView {
         view: xrView
         source: rightController
         enabled: true
-        leftMouseButton: rightController.actionMapper.triggerPressed
-        rightMouseButton: rightController.actionMapper.button1Pressed
-        middleMouseButton: rightController.actionMapper.button2Pressed
+        // should be fixed to follow the api changes
+        // leftMouseButton: rightController.actionMapper.triggerPressed
+        // rightMouseButton: rightController.actionMapper.button1Pressed
+        // middleMouseButton: rightController.actionMapper.button2Pressed
     }
 }
