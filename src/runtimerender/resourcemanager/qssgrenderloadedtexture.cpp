@@ -285,7 +285,7 @@ static QImage loadImage(const QString &inPath, bool flipVertical)
 
     image.convertTo(targetFormat); // convert to a format mappable to QRhiTexture::Format
     if (flipVertical)
-        image.mirror(); // Flip vertically to the conventional Y-up orientation
+        image.flip(); // Flip vertically to the conventional Y-up orientation
     return image;
 }
 

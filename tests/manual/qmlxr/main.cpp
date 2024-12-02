@@ -222,7 +222,7 @@ int main(int argc, char *argv[])
                         const QImage img(p, results[layer].pixelSize.width(), results[layer].pixelSize.height(), imageFormat);
                         // the order of the callbacks is undefined, hence must rely on the layer index
                         if (rhi->isYUpInFramebuffer())
-                            images[layer] = img.mirrored();
+                            images[layer] = img.flipped();
                         else
                             images[layer] = img.copy();
                     };
