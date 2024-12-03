@@ -433,15 +433,11 @@ void QQuick3DXrHapticFeedback::setTrigger(bool newTrigger)
     {
     case RisingEdge:
         if (newTrigger)
-        {
-            emit triggeredHaptics();
-        }
+            start();
         break;
     case TrailingEdge:
         if (!newTrigger)
-        {
-            emit triggeredHaptics();
-        }
+            start();
         break;
     default:
         break;
@@ -466,7 +462,6 @@ void QQuick3DXrHapticFeedback::setHapticEffect(QQuick3DXrAbstractHapticEffect *n
     if (m_hapticEffect == newHapticEffect)
         return;
     m_hapticEffect = newHapticEffect;
-    setTriggerConnection();
     emit hapticEffectChanged();
 }
 
@@ -501,10 +496,7 @@ void QQuick3DXrHapticFeedback::setCondition(enum Condition newCondition)
  */
 void QQuick3DXrHapticFeedback::start()
 {
-    if (m_hapticEffect)
-    {
-        m_hapticEffect->start();
-    }
+    m_pending = true;
 }
 
 /*!
@@ -513,22 +505,14 @@ void QQuick3DXrHapticFeedback::start()
  */
 void QQuick3DXrHapticFeedback::stop()
 {
-    if (m_hapticEffect)
-    {
-        m_hapticEffect->stop();
-    }
+    m_pending = false;
 }
 
-void QQuick3DXrHapticFeedback::setTriggerConnection()
+bool QQuick3DXrHapticFeedback::testAndClear()
 {
-    if (m_triggerConnection && (m_hapticEffect == nullptr)) {
-
-        QObject::disconnect(m_triggerConnection);
-        m_triggerConnection = {};
-    }
-    if (m_hapticEffect) {
-        m_triggerConnection = QObject::connect(this, SIGNAL(triggeredHaptics()), m_hapticEffect, SLOT(start()));
-    }
+    bool t = m_pending;
+    m_pending = false;
+    return t;
 }
 
 QT_END_NAMESPACE

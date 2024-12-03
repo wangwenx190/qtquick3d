@@ -19,6 +19,7 @@
 #include <QQmlEngine>
 
 QT_BEGIN_NAMESPACE
+class QQuick3DXrSimpleHapticEffect;
 
 class QQuick3DXrAbstractHapticEffect : public QObject
 {
@@ -26,10 +27,6 @@ class QQuick3DXrAbstractHapticEffect : public QObject
     QML_NAMED_ELEMENT(XrHapticEffect)
     QML_UNCREATABLE("XrHapticEffect is an abstract base class.")
     QML_ADDED_IN_VERSION(6, 9)
-
-public Q_SLOTS:
-    virtual void start();
-    virtual void stop();
 };
 
 class QQuick3DXrSimpleHapticEffect : public QQuick3DXrAbstractHapticEffect
@@ -49,22 +46,16 @@ public:
     void setDuration(float newDuration);
     float frequency();
     void setFrequency(float newFrequency);
-    bool getRunning();
 
 signals:
     void amplitudeChanged();
     void durationChanged();
     void frequencyChanged();
 
-public Q_SLOTS:
-    void start() override;
-    void stop() override;
-
 private:
     float m_amplitude = 0.5;
     float m_duration = 30;
     float m_frequency = 3000;
-    bool m_running = false;
 };
 
 QT_END_NAMESPACE

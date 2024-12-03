@@ -111,7 +111,7 @@ public:
     bool enabled() const;
     void setEnabled(bool newEnabled);
 
-signals:
+Q_SIGNALS:
     void valueChanged();
     void pressedChanged();
     void triggered();
@@ -180,12 +180,13 @@ public:
     enum Condition condition()  const;
     void setCondition(enum Condition newCondition);
 
-signals:
+    bool testAndClear();
+
+Q_SIGNALS:
     void handChanged();
     void hapticEffectChanged();
     void triggerChanged();
     void conditionChanged();
-    void triggeredHaptics();
 
 public Q_SLOTS:
     void start();
@@ -198,8 +199,7 @@ private:
     QPointer<QQuick3DXrAbstractHapticEffect> m_hapticEffect;
     bool m_trigger = false;
     bool m_componentComplete = false;
-    void setTriggerConnection();
-
+    bool m_pending = false;
 };
 
 class QQuick3DXrActionMapper : public QObject

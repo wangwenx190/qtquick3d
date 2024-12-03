@@ -5,14 +5,6 @@
 
 QT_BEGIN_NAMESPACE
 
-void QQuick3DXrAbstractHapticEffect::start()
-{
-}
-
-void QQuick3DXrAbstractHapticEffect::stop()
-{
-}
-
 /*!
     \qmltype XrHapticEffect
     \qmlabstract
@@ -63,21 +55,6 @@ void QQuick3DXrSimpleHapticEffect::setAmplitude(float newAmplitude)
         return;
     m_amplitude = newAmplitude;
     emit amplitudeChanged();
-}
-
-void QQuick3DXrSimpleHapticEffect::start()
-{
-    m_running = true;
-}
-
-void QQuick3DXrSimpleHapticEffect::stop()
-{
-    m_running = false;
-}
-
-bool QQuick3DXrSimpleHapticEffect::getRunning()
-{
-    return m_running;
 }
 
 /*!

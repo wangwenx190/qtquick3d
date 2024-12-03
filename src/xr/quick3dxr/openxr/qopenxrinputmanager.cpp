@@ -518,15 +518,12 @@ void QQuick3DXrInputManagerPrivate::pollActions()
     //    XrAction aimPoseAction{XR_NULL_HANDLE};
     //    XrAction hapticAction{XR_NULL_HANDLE};
 
-        QList<QPointer<QQuick3DXrHapticFeedback>> hapticOutputData = QQuick3DXrActionMapper::getHapticEffects(static_cast<QQuick3DXrInputAction::Hand>(hand));
+        const QList<QPointer<QQuick3DXrHapticFeedback>> hapticOutputData = QQuick3DXrActionMapper::getHapticEffects(static_cast<QQuick3DXrInputAction::Hand>(hand));
 
-        QList<QPointer<QQuick3DXrHapticFeedback>>::iterator hapticFeedback;
-        for (hapticFeedback = hapticOutputData.begin(); hapticFeedback != hapticOutputData.end(); hapticFeedback++)
-        {
-            if (QQuick3DXrSimpleHapticEffect *hapticEffect = dynamic_cast<QQuick3DXrSimpleHapticEffect *>((*hapticFeedback)->hapticEffect()))
-            {
-                if (hapticEffect->getRunning())
-                {
+        for (auto &hapticFeedback : hapticOutputData) {
+            const bool triggered = hapticFeedback->testAndClear();
+            if (triggered) {
+                if (auto *hapticEffect = qobject_cast<QQuick3DXrSimpleHapticEffect*>(hapticFeedback->hapticEffect())) {
                     XrHapticVibration vibration {XR_TYPE_HAPTIC_VIBRATION, nullptr, 0, 0, 0};
                     vibration.amplitude = hapticEffect->amplitude();
                     vibration.duration = hapticEffect->duration() * 1000000; // Change from milliseconds to nanoseconds
@@ -534,7 +531,6 @@ void QQuick3DXrInputManagerPrivate::pollActions()
 
                     XrHapticActionInfo hapticActionInfo {XR_TYPE_HAPTIC_ACTION_INFO, nullptr, m_handActions.hapticAction, m_handSubactionPath[hand]};
 
-                    hapticEffect->stop();
                     if (!checkXrResult(xrApplyHapticFeedback(m_session, &hapticActionInfo, (const XrHapticBaseHeader*)&vibration))) {
                         qWarning("Failed to trigger haptic feedback");
                     }
