@@ -1089,6 +1089,8 @@ static void generateFragmentShader(QSSGStageGeneratorBase &fragmentShader,
         metalnessEnabled = false;
         specularLightingEnabled = false;
 
+        oitMethod = QSSGRenderLayer::OITMethod::None;
+
         if (!isOpaqueDepthPrePass) {
             vertexColorsEnabled = false;
             baseImage = nullptr;
