@@ -357,7 +357,7 @@ void QQuick3DXrInputAction::setEnabled(bool newEnabled)
         hand: XrHapticFeedback.RightHand
         condition: XrHapticFeedback.RisingEdge
         trigger: someObject.hit
-        hapticEffect: XrBasicHapticEffect {
+        hapticEffect: XrSimpleHapticEffect {
             amplitude: 0.5
             duration: 300
             frequency: 3000

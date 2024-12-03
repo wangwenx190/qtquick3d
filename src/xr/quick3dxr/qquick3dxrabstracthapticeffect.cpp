@@ -23,20 +23,20 @@ void QQuick3DXrAbstractHapticEffect::stop()
 
     XrHapticEffect defines the characteristics of the haptic effect.
 
-    This type is abstract. Use a subtype, such as \l XrBasicHapticEffect.
+    This type is abstract. Use a subtype, such as \l XrSimpleHapticEffect.
 
-    \sa XrHapticFeedback XrBasicHapticEffect
+    \sa XrHapticFeedback XrSimpleHapticEffect
  */
 
 /*!
-    \qmltype XrBasicHapticEffect
+    \qmltype XrSimpleHapticEffect
     \inherits XrHapticEffect
     \inqmlmodule QtQuick3D.Xr
     \brief Allows setting controller haptics using amplitude, duration and frequency.
     \since 6.9
 
     \qml
-    XrBasicHapticEffect {
+    XrSimpleHapticEffect {
         amplitude: 0.5
         duration: 300
         frequency: 3000
@@ -47,17 +47,17 @@ void QQuick3DXrAbstractHapticEffect::stop()
 */
 
 /*!
-    \qmlproperty bool XrBasicHapticEffect::amplitude()
+    \qmlproperty bool XrSimpleHapticEffect::amplitude()
     \brief Defines the amplitude of the effect's vibration.
     Acceptable values are from 0.0 to 1.0
     \default 0.5
  */
-float QQuick3DXrBasicHapticEffect::amplitude()
+float QQuick3DXrSimpleHapticEffect::amplitude()
 {
     return m_amplitude;
 }
 
-void QQuick3DXrBasicHapticEffect::setAmplitude(float newAmplitude)
+void QQuick3DXrSimpleHapticEffect::setAmplitude(float newAmplitude)
 {
     if (m_amplitude == newAmplitude)
         return;
@@ -65,32 +65,32 @@ void QQuick3DXrBasicHapticEffect::setAmplitude(float newAmplitude)
     emit amplitudeChanged();
 }
 
-void QQuick3DXrBasicHapticEffect::start()
+void QQuick3DXrSimpleHapticEffect::start()
 {
     m_running = true;
 }
 
-void QQuick3DXrBasicHapticEffect::stop()
+void QQuick3DXrSimpleHapticEffect::stop()
 {
     m_running = false;
 }
 
-bool QQuick3DXrBasicHapticEffect::getRunning()
+bool QQuick3DXrSimpleHapticEffect::getRunning()
 {
     return m_running;
 }
 
 /*!
-    \qmlproperty bool XrBasicHapticEffect::duration()
+    \qmlproperty bool XrSimpleHapticEffect::duration()
     \brief Defines the duration of the haptic effect in milliseconds.
     \default 30
  */
-float QQuick3DXrBasicHapticEffect::duration()
+float QQuick3DXrSimpleHapticEffect::duration()
 {
     return m_duration;
 }
 
-void QQuick3DXrBasicHapticEffect::setDuration(float newDuration)
+void QQuick3DXrSimpleHapticEffect::setDuration(float newDuration)
 {
     if (m_duration == newDuration)
         return;
@@ -99,17 +99,17 @@ void QQuick3DXrBasicHapticEffect::setDuration(float newDuration)
 }
 
 /*!
-    \qmlproperty bool XrBasicHapticEffect::frequency()
+    \qmlproperty bool XrSimpleHapticEffect::frequency()
     \brief Defines the frequency of the haptic effect in Hz
     \default 3000
  */
 
-float QQuick3DXrBasicHapticEffect::frequency()
+float QQuick3DXrSimpleHapticEffect::frequency()
 {
     return m_frequency;
 }
 
-void QQuick3DXrBasicHapticEffect::setFrequency(float newFrequency)
+void QQuick3DXrSimpleHapticEffect::setFrequency(float newFrequency)
 {
     if (m_frequency == newFrequency)
         return;

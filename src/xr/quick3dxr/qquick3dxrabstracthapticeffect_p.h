@@ -32,10 +32,10 @@ public Q_SLOTS:
     virtual void stop();
 };
 
-class QQuick3DXrBasicHapticEffect : public QQuick3DXrAbstractHapticEffect
+class QQuick3DXrSimpleHapticEffect : public QQuick3DXrAbstractHapticEffect
 {
     Q_OBJECT
-    QML_NAMED_ELEMENT(XrBasicHapticEffect)
+    QML_NAMED_ELEMENT(XrSimpleHapticEffect)
     QML_ADDED_IN_VERSION(6, 9)
 
     Q_PROPERTY(float amplitude READ amplitude WRITE setAmplitude NOTIFY amplitudeChanged FINAL)

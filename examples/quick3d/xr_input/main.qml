@@ -40,7 +40,7 @@ XrView {
         hand: XrHapticFeedback.RightHand
         condition: XrHapticFeedback.RisingEdge
         trigger: pickRay.hit
-        hapticEffect: XrBasicHapticEffect {
+        hapticEffect: XrSimpleHapticEffect {
             amplitude: 0.5
             duration: 30
             frequency: 3000
