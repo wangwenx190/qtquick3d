@@ -51,58 +51,34 @@ XrView {
     XrOrigin {
         id: theOrigin
         z: 100
-        //! [picking]
+
         XrController {
             id: rightController
             controller: XrController.ControllerRight
             poseSpace: XrController.AimPose
 
-            property QtObject hitObject
-
-            onRotationChanged: {
-                const pickResult = xrView.rayPick(scenePosition, forward)
-                if (pickResult.hitType !== PickResult.Null) {
-                    pickRay.hit = true
-                    pickRay.length = pickResult.distance
-                    hitObject = pickResult.objectHit
-                } else {
-                    pickRay.hit = false
-                    pickRay.length = 50
-                    hitObject = null
-                }
-            }
-
             Node {
-                id: pickRay
-                property real length: 50
-                property bool hit: false
-
-                z: -length/2
                 Model {
-                    eulerRotation.x: 90
-                    scale: Qt.vector3d(0.02, pickRay.length/100, 0.02)
-                    source: "#Cylinder"
-                    materials: PrincipledMaterial { baseColor: pickRay.hit ? "green" : "gray" }
-                    opacity: 0.5
-                }
-            }
-
-            Node {
-                z: 5
-                Model {
-                    eulerRotation.x: 90
-                    scale: Qt.vector3d(0.05, 0.10, 0.05)
-                    source: "#Cylinder"
+                    scale: Qt.vector3d(0.02, 0.02, 0.02)
+                    source: "#Sphere"
                     materials: PrincipledMaterial {
                         baseColor: "black"
                         roughness: 0.2
                     }
                 }
             }
-
         }
-        //! [picking]
     }
+
+    //! [picking]
+    RayPointer {
+        id: pickRay
+        rayPicker: xrView
+        beamHandle: rightController
+        pressed: rightTrigger.pressed
+        pointerSize: 5.0
+    }
+    //! [picking]
 
     //! [trigger input]
     XrInputAction {
@@ -110,7 +86,7 @@ XrView {
         hand: XrInputAction.RightHand
         actionId: [XrInputAction.TriggerPressed, XrInputAction.TriggerValue, XrInputAction.IndexFingerPinch]
         onTriggered: {
-            const button = rightController.hitObject as ExampleButton
+            const button = pickRay.hitObject as ExampleButton
             if (button && button !== panel.activeButton) {
                 panel.activeButton = button
             }
