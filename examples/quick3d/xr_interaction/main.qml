@@ -40,7 +40,7 @@ XrView {
     //! [haptics]
     XrHapticFeedback {
         id: hapticFeedback
-        hand: XrHapticFeedback.RightHand
+        controller: XrHapticFeedback.RightController
         hapticEffect: XrSimpleHapticEffect {
             amplitude: 0.5
             duration: 30

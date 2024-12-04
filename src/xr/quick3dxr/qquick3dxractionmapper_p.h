@@ -141,7 +141,7 @@ class QQuick3DXrHapticFeedback : public QObject, public QQmlParserStatus
     QML_NAMED_ELEMENT(XrHapticFeedback)
     QML_ADDED_IN_VERSION(6, 9)
 
-    Q_PROPERTY(Hand hand READ hand WRITE setHand NOTIFY handChanged FINAL)
+    Q_PROPERTY(Controller controller READ controller WRITE setController NOTIFY controllerChanged FINAL)
     Q_PROPERTY(QQuick3DXrAbstractHapticEffect *hapticEffect READ hapticEffect WRITE setHapticEffect NOTIFY hapticEffectChanged FINAL)
     Q_PROPERTY(bool trigger READ trigger WRITE setTrigger NOTIFY triggerChanged FINAL)
     Q_PROPERTY(Condition condition READ condition WRITE setCondition NOTIFY conditionChanged FINAL)
@@ -149,12 +149,12 @@ class QQuick3DXrHapticFeedback : public QObject, public QQmlParserStatus
 public:
 
     // Same values as XrController and XrHandModel enums
-    enum Hand : quint8 {
-        LeftHand = 0,
-        RightHand,
+    enum Controller : quint8 {
+        LeftController = 0,
+        RightController,
         Unknown,
     };
-    Q_ENUM(Hand)
+    Q_ENUM(Controller)
 
     enum Condition : quint8 {
         RisingEdge = 0,
@@ -171,8 +171,8 @@ public:
     QQuick3DXrAbstractHapticEffect *hapticEffect() const;
     void setHapticEffect(QQuick3DXrAbstractHapticEffect *newHapticEffect);
 
-    Hand hand() const;
-    void setHand(Hand newHand);
+    Controller controller() const;
+    void setController(Controller newController);
 
     bool trigger();
     void setTrigger(bool newTrigger);
@@ -183,7 +183,7 @@ public:
     bool testAndClear();
 
 Q_SIGNALS:
-    void handChanged();
+    void controllerChanged();
     void hapticEffectChanged();
     void triggerChanged();
     void conditionChanged();
@@ -194,7 +194,7 @@ public Q_SLOTS:
 
 private:
     QMetaObject::Connection m_triggerConnection;
-    Hand m_hand;
+    Controller m_controller;
     Condition m_condition = RisingEdge;
     QPointer<QQuick3DXrAbstractHapticEffect> m_hapticEffect;
     bool m_trigger = false;

@@ -37,7 +37,7 @@ XrView {
 
     //! [haptics]
     XrHapticFeedback {
-        hand: XrHapticFeedback.RightHand
+        controller: XrHapticFeedback.RightController
         condition: XrHapticFeedback.RisingEdge
         trigger: pickRay.hit
         hapticEffect: XrSimpleHapticEffect {

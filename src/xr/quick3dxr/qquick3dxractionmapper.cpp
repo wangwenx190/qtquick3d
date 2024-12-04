@@ -78,7 +78,7 @@ void QQuick3DXrActionMapper::registerHapticEffect(QPointer<QQuick3DXrHapticFeedb
 {
     auto *that = instance();
 
-    that->m_hapticData[action->hand()].m_hapticEffects.append(action);
+    that->m_hapticData[action->controller()].m_hapticEffects.append(action);
 }
 
 void QQuick3DXrActionMapper::removeAction(QQuick3DXrInputAction *action)
@@ -100,7 +100,7 @@ void QQuick3DXrActionMapper::removeAction(QQuick3DXrInputAction *action)
 void QQuick3DXrActionMapper::removeHapticEffect(QQuick3DXrHapticFeedback *action)
 {
     auto *that = instance();
-    QList<QPointer<QQuick3DXrHapticFeedback>> list = that->m_hapticData[action->hand()].m_hapticEffects;
+    QList<QPointer<QQuick3DXrHapticFeedback>> list = that->m_hapticData[action->controller()].m_hapticEffects;
     list.removeAt(list.indexOf(action));
 }
 
@@ -354,7 +354,7 @@ void QQuick3DXrInputAction::setEnabled(bool newEnabled)
 
     \qml
     XrHapticFeedback {
-        hand: XrHapticFeedback.RightHand
+        controller: XrHapticFeedback.RightController
         condition: XrHapticFeedback.RisingEdge
         trigger: someObject.hit
         hapticEffect: XrSimpleHapticEffect {
@@ -387,27 +387,27 @@ void QQuick3DXrHapticFeedback::componentComplete()
 }
 
 /*!
-    \qmlproperty enumeration QtQuick3D.Xr::XrHapticFeedback::hand
-    \brief The Hand that this haptic feedback will apply to.
+    \qmlproperty enumeration QtQuick3D.Xr::XrHapticFeedback::controller
+    \brief The Controller that this haptic feedback will apply to.
 
     It can be one of:
 
-    \value XrHapticFeedback.LeftHand
-    \value XrHapticFeedback.RightHand
+    \value XrHapticFeedback.LeftController
+    \value XrHapticFeedback.RightController
     \value XrHapticFeedback.Unknown
  */
 
-QQuick3DXrHapticFeedback::Hand QQuick3DXrHapticFeedback::hand() const
+QQuick3DXrHapticFeedback::Controller QQuick3DXrHapticFeedback::controller() const
 {
-    return m_hand;
+    return m_controller;
 }
 
-void QQuick3DXrHapticFeedback::setHand(Hand newHand)
+void QQuick3DXrHapticFeedback::setController(Controller newController)
 {
-    if (m_hand == newHand)
+    if (m_controller == newController)
         return;
-    m_hand = newHand;
-    emit handChanged();
+    m_controller = newController;
+    emit controllerChanged();
 }
 
 /*!
