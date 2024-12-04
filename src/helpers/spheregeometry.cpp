@@ -23,7 +23,7 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-    \qmlproperty float SphereGeometry::radius
+    \qmlproperty real SphereGeometry::radius
     The radius of the sphere. The default value is 100.0.
 */
 

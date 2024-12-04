@@ -33,12 +33,12 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-    \qmlproperty float TorusGeometry::radius
+    \qmlproperty real TorusGeometry::radius
     Specifies the radius of the torus. The default value is 100.
 */
 
 /*!
-    \qmlproperty float TorusGeometry::tubeRadius
+    \qmlproperty real TorusGeometry::tubeRadius
     Specifies the radius of the tube of the torus. The default value is 10.
 */
 

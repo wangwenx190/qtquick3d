@@ -190,14 +190,14 @@ void createCylinderDiscIndices(quint16 *&indicesPtr,
 */
 
 /*!
-    \qmlproperty float CylinderGeometry::radius
+    \qmlproperty real CylinderGeometry::radius
 
     This property holds the radius of the cylinder. This property must be greater than 0
     to generate a valid cylinder.
 */
 
 /*!
-    \qmlproperty float CylinderGeometry::length
+    \qmlproperty real CylinderGeometry::length
 
     This property holds the length of the cylinder. This property must be greather than 0
     to generate a valid cylinder.

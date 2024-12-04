@@ -130,13 +130,13 @@ inline QVector3D mix(const QVector3D &a, const QVector3D &b, float ratio)
 */
 
 /*!
-    \qmlproperty float ExtrudedTextGeometry::depth
+    \qmlproperty real ExtrudedTextGeometry::depth
 
     This property holds the depth of the extrusion.
 */
 
 /*!
-    \qmlproperty float ExtrudedTextGeometry::scale
+    \qmlproperty real ExtrudedTextGeometry::scale
 
     This property holds a scalar value of how the geometry should be scaled.
     This property only affects the size of the text, not the depth of the extrusion.

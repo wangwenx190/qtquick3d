@@ -22,17 +22,17 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-    \qmlproperty float CuboidGeometry::xExtent
+    \qmlproperty real CuboidGeometry::xExtent
     The x extent of the cuboid. The default value is 100.0.
 */
 
 /*!
-    \qmlproperty float CuboidGeometry::yExtent
+    \qmlproperty real CuboidGeometry::yExtent
     The y extent of the cuboid. The default value is 100.0.
 */
 
 /*!
-    \qmlproperty float CuboidGeometry::zExtent
+    \qmlproperty real CuboidGeometry::zExtent
     The z extent of the cuboid. The default value is 100.0.
 */
 

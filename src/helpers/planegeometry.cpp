@@ -23,12 +23,12 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-    \qmlproperty float PlaneGeometry::width
+    \qmlproperty real PlaneGeometry::width
     The width of the plane. The default value is 100.0.
 */
 
 /*!
-    \qmlproperty float PlaneGeometry::height
+    \qmlproperty real PlaneGeometry::height
     The height of the plane. The default value is 100.0.
 */
 

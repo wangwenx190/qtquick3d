@@ -217,21 +217,21 @@ void createDiscIndices(quint16 *&indicesPtr,
 */
 
 /*!
-    \qmlproperty float ConeGeometry::topRadius
+    \qmlproperty real ConeGeometry::topRadius
     This property holds the top radius of the cone. This value must be 0 or greater.
 
     \note topRadius and bottomRadius can not both be \c 0.0
 */
 
 /*!
-    \qmlproperty float ConeGeometry::bottomRadius
+    \qmlproperty real ConeGeometry::bottomRadius
     This property holds the bottom radius of the cone.
 
     \note topRadius and bottomRadius can not both be \c 0.0
 */
 
 /*!
-    \qmlproperty float ConeGeometry::length
+    \qmlproperty real ConeGeometry::length
     This property holds the length of the cone. This value must be greater than 0 to
     generate a cone.
 */
