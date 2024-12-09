@@ -42,6 +42,38 @@ QT_BEGIN_NAMESPACE
     }
     \endqml
 
+    The table below describes the built-in meshes in more detail.
+
+    \table
+    \header
+        \li Name
+        \li Description
+        \li No. faces
+    \row
+        \li #Cone
+        \li A cone with a height and diameter of \c{100}. The base is at the
+            origin and the cone is pointing upwards in the y direction.
+        \li \c{78}
+    \row
+        \li #Cube
+        \li A cube centered at the origin with \c{100} long sides along x, y and z.
+        \li \c{12}
+    \row
+        \li #Cylinder
+        \li A cylinder with \c{100} height and diameter centered at the origin
+            expanding along the y direction.
+        \li \c{316}
+    \row
+        \li #Rectangle
+        \li A rectangle with \c{100} width and height centered at the origin
+            lying in the xy plane.
+        \li \c{2}
+    \row
+        \li #Sphere
+        \li A sphere with \c{100} diameter centered at the origin.
+        \li \c{4900}
+    \endtable
+
     \section2 Custom geometry
 
     In addition to using static meshes, you can implement a
