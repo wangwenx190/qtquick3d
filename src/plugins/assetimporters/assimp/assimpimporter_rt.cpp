@@ -189,7 +189,10 @@ ResourceIOStream::ResourceIOStream(const char *pFile, const char *pMode) : file(
         openMode |= QFile::WriteOnly;
     if (mode.endsWith("t"))
         openMode |= QFile::Text;
-    file.open(openMode);
+    if (!file.open(openMode)) {
+        qWarning("Failed to open file %s: %s",
+                 qPrintable(file.fileName()), qPrintable(file.errorString()));
+    }
 }
 
 size_t ResourceIOStream::Read(void *pvBuffer, size_t pSize, size_t pCount)
